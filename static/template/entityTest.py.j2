@@ -1,0 +1,28 @@
+from unittest import TestCase
+from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+from ..Mocks.{{ entity.nameEntity }}Mock import {{ entity.nameEntity }}Mock
+
+class {{ entity.nameEntity }}EntityTest(TestCase):
+    {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
+    
+    def test_initEntity(self):
+        {{ entity.nameEntity | lower }}Entity = {{ entity.nameEntity }}Entity()
+        {%- for column in entity.columns %}
+        assert {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} == None
+        {%- endfor %}
+
+    def test_createEntity(self):
+        {{ entity.nameEntity | lower }}Entity = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+        {%- for column in entity.columns %}
+        assert {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} == self.{{ entity.nameEntity | lower }}Mock.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
+        {%- endfor %}
+
+    def test_updateEntity(self):
+        {{ entity.nameEntity | lower }}Entity = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+        {% for column in entity.columns %}
+        {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} = self.{{ entity.nameEntity | lower }}Mock.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_UPDATE
+        {%- endfor %}
+        {% for column in entity.columns %}
+        assert {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} != self.{{ entity.nameEntity | lower }}Mock.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
+        assert {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} == self.{{ entity.nameEntity | lower }}Mock.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_UPDATE
+        {%- endfor %}

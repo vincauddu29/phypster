@@ -1,0 +1,9 @@
+from src import ma
+from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+
+class {{ entity.nameEntity }}DTO(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = {{ entity.nameEntity }}Entity
+        include_fk = True
+
+    

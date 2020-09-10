@@ -1,0 +1,47 @@
+from unittest import TestCase
+from src.Mappeurs.{{ entity.nameEntity }}Mappeur import {{ entity.nameEntity }}Mappeur
+from ..Mocks.{{ entity.nameEntity }}Mock import {{ entity.nameEntity }}Mock
+
+class {{ entity.nameEntity }}MappeurTest(TestCase):
+
+    {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
+
+    def test_toDTO(self):
+        {{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
+        entity = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+        dto = {{ entity.nameEntity | lower }}Mappeur.toDTO(entity)
+
+        {%- for column in entity.columns %}
+        assert entity.{{ column.nameColumn }} == dto['{{ column.nameColumn }}']
+        {%- endfor %}
+        {%- for relationship in entity.relationships -%}    
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity %}
+        assert entity.{{ relationship.entity2.nameEntity | lower }}.{{ relationship.entity2.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity2.nameEntity | lower }}']
+        {%- else %}
+        assert entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity1.nameEntity | lower }}']
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity %}
+        assert entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity2.nameEntity | lower }}']
+        {% else %}
+        for i in range(len(dto['{{ relationship.entity1.nameEntity | lower }}'])):
+            assert entity.{{ relationship.entity1.nameEntity | lower }}[i].{{ relationship.entity1.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity1.nameEntity | lower }}'][i]
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity %}
+        for i in range(len(dto['{{ relationship.entity2.nameEntity | lower }}'])):
+            assert entity.{{ relationship.entity2.nameEntity | lower }}[i].{{ relationship.entity2.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity2.nameEntity | lower }}'][i]
+        {%- else %}
+        assert entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity1.nameEntity | lower }}']
+        {%- endif %}
+        {%- else %}
+        {%- if relationship.entity1 == entity %}
+        for i in range(len(dto['{{ relationship.entity2.nameEntity | lower }}'])):
+            assert entity.{{ relationship.entity2.nameEntity | lower }}[i].{{ relationship.entity2.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity2.nameEntity | lower }}'][i]   
+        {%- else %}
+        for i in range(len(dto['{{ relationship.entity1.nameEntity | lower }}'])):
+            assert entity.{{ relationship.entity1.nameEntity | lower }}[i].{{ relationship.entity1.getPrimaryKey().nameColumn }} == dto['{{ relationship.entity1.nameEntity | lower }}'][i]
+        {%- endif -%}
+        {%- endif -%}
+        {%- endfor %}

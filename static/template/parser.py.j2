@@ -1,0 +1,56 @@
+from flask_restful import reqparse, inputs
+from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+
+class {{ entity.nameEntity }}Parser():
+    {{ entity.nameEntity | lower }}Parser = reqparse.RequestParser()
+    {%- for column in entity.columns %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ column.nameColumn }}', type={{ column.typeDataPython() }}, required={{ not column.nullable }}, location='json')
+    {%- endfor %}
+    {%- for relationship in entity.relationships -%}
+    {%- if relationship.isOneToOne %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity2.nameEntity | lower }}', type=int, location='json')
+    {%- else %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity1.nameEntity | lower }}', type=int, location='json')
+    {%- endif %}
+    {%- elif relationship.isManyToOne %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity2.nameEntity | lower }}', type=int, location='json')
+    {%- else %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity1.nameEntity | lower }}', type=int, action='append', location='json')
+    {%- endif %}
+    {%- elif relationship.isOneToMany %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity2.nameEntity | lower }}', type=int, action='append', location='json')
+    {% else %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity1.nameEntity | lower }}', type=int, location='json')
+    {%- endif %}
+    {%- else %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity2.nameEntity | lower }}', type=int, action='append', location='json')
+    {%- else %}
+    {{ entity.nameEntity | lower }}Parser.add_argument('{{ relationship.entity1.nameEntity | lower }}', type=int, action='append', location='json')
+    {%- endif %}
+    {%- endif %}
+    {%- endfor %}
+
+    def getReqparse(self):
+        return self.{{ entity.nameEntity | lower }}Parser
+
+    def toDTO(self, args):
+        dto = {{ entity.nameEntity }}DTO(None
+        {%- if entity.columns | length > 0 %}
+            {%- for column in entity.columns[:-1] -%}
+            , args['{{ column.nameColumn }}']
+            {%- endfor -%}
+            , args['{{ entity.columns[-1].nameColumn }}']
+        {%- endif -%}
+        {%- if entity.relationships | length > 0 %}
+        {%- for relationship in entity.relationships -%}
+            , {% if relationship.entity1 == entity %}args['{{ relationship.entity2.nameEntity | lower }}']{% else %}args['{{ relationship.entity1.nameEntity | lower }}']{% endif %}{% if loop.last %}){% endif %}
+        {%- endfor -%}
+        {%- else -%}
+        )
+        {%- endif %}
+
+        return dto

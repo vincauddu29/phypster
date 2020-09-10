@@ -1,0 +1,33 @@
+class {{ entity.nameEntity }}DTO(dict):
+    def __init__(self, {{ entity.getPrimaryKey().nameColumn }}
+        {%- if entity.columns | length > 0 -%}
+            {%- for column in entity.columns[:-1] -%}
+                , {{ column.nameColumn }}
+            {%- endfor -%}
+            , {{ entity.columns[-1].nameColumn }}
+            {%- if entity.relationships | length > 0 -%}
+                {%- for relationship in entity.relationships -%}
+                    , {% if entity == relationship.entity1 %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}{% if loop.last %}):{% endif %}
+                {%- endfor -%}
+            {%- else -%}
+                ):
+            {%- endif %}
+        {%- else -%}
+            ):
+        {%- endif %}
+        dict.__init__(self, id = {{ entity.getPrimaryKey().nameColumn }}
+            {%- if entity.columns | length > 0 -%}
+                {%- for column in entity.columns[:-1] -%}
+                    , {{ column.nameColumn }} = {{ column.nameColumn }}
+                {%- endfor -%}
+                , {{ entity.columns[-1].nameColumn }} = {{- entity.columns[-1].nameColumn }}
+                {%- if entity.relationships | length > 0 -%}
+                    {%- for relationship in entity.relationships -%}
+                        , {% if entity == relationship.entity1 %}{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}{% endif %}{% if loop.last %}){% endif %}
+                    {%- endfor -%}
+                {%- else -%}
+                    )
+                {%- endif %}
+            {%- else -%}
+                )
+            {%- endif %}

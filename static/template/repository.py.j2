@@ -1,0 +1,32 @@
+from src import db, logger
+from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+from typing import List
+
+class {{ entity.nameEntity }}Repository:
+    def __init__(self):
+        pass
+
+    def save(self, entity) -> {{ entity.nameEntity }}Entity:
+        try:
+            db.session.add(entity)
+            db.session.flush()
+            db.session.commit()
+            return entity
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Repository.save, {0}".format(e))
+
+    def get(self) -> List[{{ entity.nameEntity }}Entity]:
+        try:
+            return db.session.query({{ entity.nameEntity }}Entity).all()
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Repository.get, {0}".format(e))
+            return list()
+
+    def remove(self, entity) -> bool:
+        try:
+            db.session.delete(entity)
+            db.session.commit()
+            return True
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Repository.remove, {0}".format(e))
+            return False

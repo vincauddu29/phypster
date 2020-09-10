@@ -1,0 +1,50 @@
+from src.Mappeurs.{{ entity.nameEntity }}Mappeur import {{ entity.nameEntity }}Mappeur
+from src.Repositories.{{ entity.nameEntity }}Repository import {{ entity.nameEntity }}Repository
+from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+from typing import List
+
+class {{ entity.nameEntity }}Service:
+    def __init__(self):
+        self.{{ entity.nameEntity | lower }}Repository = {{ entity.nameEntity }}Repository()
+        self.{{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
+
+    def get(self, id: int) -> {{ entity.nameEntity }}DTO:
+        entities = self.{{ entity.nameEntity | lower }}Repository.get()
+        if len(entities) > 0:
+            {{ entity.nameEntity | lower }}_entity = list(filter(lambda entity : entity.{{ entity.getPrimaryKey().nameColumn }} == id, entities))[0]
+            return self.{{ entity.nameEntity | lower }}Mappeur.toDTO({{ entity.nameEntity | lower }}_entity)
+        else:
+            return None
+
+    def getAll(self) -> List[{{ entity.nameEntity }}DTO]:
+        entities_in = self.{{ entity.nameEntity | lower }}Repository.get()
+        entities_out = []
+
+        for entity in entities_in:
+            entities_out.append(self.{{ entity.nameEntity | lower }}Mappeur.toDTO(entity))
+
+        return entities_out
+
+    def add(self, {{ entity.nameEntity | lower }}_dto: {{ entity.nameEntity }}DTO) -> {{ entity.nameEntity }}DTO:
+        {{ entity.nameEntity | lower }}_entity = self.{{ entity.nameEntity | lower }}Mappeur.toEntity({{ entity.nameEntity | lower }}_dto)
+
+        {{ entity.nameEntity | lower }}_entity = self.{{ entity.nameEntity | lower }}Repository.save({{ entity.nameEntity | lower }}_entity)
+
+        return self.{{ entity.nameEntity | lower }}Mappeur.toDTO({{ entity.nameEntity | lower }}_entity)
+
+    def update(self, id: int, {{ entity.nameEntity | lower }}_dto: {{ entity.nameEntity }}DTO) -> {{ entity.nameEntity }}DTO:
+        {{ entity.nameEntity | lower }}_dto_old = self.get(id)
+        if {{ entity.nameEntity | lower }}_dto_old is not None:
+            {{ entity.nameEntity | lower }}_entity = self.{{ entity.nameEntity | lower }}Mappeur.toEntity({{ entity.nameEntity | lower }}_dto)
+            self.{{ entity.nameEntity | lower }}Repository.save({{ entity.nameEntity | lower }}_entity)
+            return {{ entity.nameEntity | lower }}_dto
+        else:
+            return None
+
+    def remove(self, id: int) -> {{ entity.nameEntity }}DTO:
+        {{ entity.nameEntity | lower }}_entity = self.get(id)
+
+        if self.{{ entity.nameEntity | lower }}Repository.remove({{ entity.nameEntity | lower }}_entity):
+            return self.{{ entity.nameEntity | lower }}Mappeur.toDTO({{ entity.nameEntity | lower }}_entity)
+        else:
+            return None

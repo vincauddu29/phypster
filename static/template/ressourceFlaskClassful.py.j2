@@ -1,0 +1,84 @@
+from flask import jsonify, abort, request
+from flask_classful import FlaskView, route
+from flask_jwt_extended import get_jwt_identity, jwt_required
+from src import logger
+from src.Services.{{ entity.nameEntity }}Service import {{ entity.nameEntity }}Service
+from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+from src.Parsers.{{ entity.nameEntity }}Parser import {{ entity.nameEntity }}Parser
+from typing import List
+
+class {{ entity.nameEntity }}Ressource(FlaskView):
+    route_prefix = '/{{ entity.nameEntity }}'
+    route_base = '/'
+
+    {{ entity.nameEntity | lower }}Service = {{ entity.nameEntity }}Service()
+    {{ entity.nameEntity | lower }}Parser = {{ entity.nameEntity }}Parser()
+
+    @route('/<id>')
+    def getById(self, id) -> {{ entity.nameEntity }}DTO:
+        logger.debug("{{ entity.nameEntity }}Ressource, call getById with id = {0}".format(id))
+        
+        res = self.{{ entity.nameEntity | lower }}Service.get(id)
+
+        if res != None:
+            return jsonify(res), 200
+        else:
+            abort(404)
+    
+    def get(self) -> List[{{ entity.nameEntity }}DTO]:
+        logger.debug("{{ entity.nameEntity }}Ressource, call get")
+        res = self.{{ entity.nameEntity | lower }}Service.getAll()
+        if res != None:
+            return jsonify(res), 200
+        else:
+            abort(404)
+
+    def post(self) -> {{ entity.nameEntity }}DTO:
+        logger.debug("{{ entity.nameEntity }}Ressource, call post, json = {0}".format(request.get_json()))
+        args = None
+        dto = None
+        try:
+            args = self.{{ entity.nameEntity | lower }}Parser.getReqparse().parse_args()
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Ressource, post error parsing args, error = {0}".format(e))
+            abort(500)
+        try:
+            dto = self.{{ entity.nameEntity | lower }}Parser.toDTO(args)
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Ressource, post error toDTO, error = {0}".format(e))
+            abort(500)
+
+        dto = self.{{ entity.nameEntity | lower }}Service.add(dto)
+        if dto != None:
+            return jsonify(dto), 201
+        else:
+            return None, 500
+
+    def put(self, id) -> {{ entity.nameEntity }}DTO:
+        logger.debug("{{ entity.nameEntity }}Ressource, call put")
+        args = None
+        dto = None
+        try:
+            args = self.{{ entity.nameEntity | lower }}Parser.getReqparse().parse_args()
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Ressource, put error parsing args, error = {0}".format(e))
+            abort(500)
+        try:
+            dto = self.{{ entity.nameEntity | lower }}Parser.toDTO(args)
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Ressource, put error toDTO, error = {0}".format(e))
+            abort(500)
+
+        dto = self.{{ entity.nameEntity | lower }}Service.update(id, dto)
+        if dto != None:
+            return jsonify(dto), 200
+        else:
+            return None, 500
+
+    def delete(self, id) -> {{ entity.nameEntity }}DTO:
+        logger.debug("{{ entity.nameEntity }}Ressource, call delete")
+        dto = self.{{ entity.nameEntity | lower }}Service.remove(id)
+        if dto != None:
+            return jsonify(dto), 200
+        else:
+            return None, 500

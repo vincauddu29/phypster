@@ -1,0 +1,176 @@
+from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+from typing import List
+
+class {{ entity.nameEntity }}Mappeur:
+    def toDTO(self, entity: {{ entity.nameEntity }}Entity) -> {{ entity.nameEntity }}DTO:
+        RELATIONSHIPS = dict()
+        {%- for relationship in entity.relationships -%}
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity %}
+        # OneToOne 2
+        if entity.{{ relationship.entity2.nameEntity | lower }} != None:
+            RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = entity.{{ relationship.entity2.nameEntity | lower }}.{{ relationship.entity2.getPrimaryKey().nameColumn }}
+        else:
+            RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = None
+        {% else %}
+        # OneToOne 1
+        if entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} != None:
+            RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}
+        else:
+            RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = None        
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToOne 2
+        if entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} != None:
+            RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }}
+        else:
+            RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = None
+        {% else %}
+        # ManyToOne 1
+        RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = []
+        if entity.{{ relationship.entity1.nameEntity | lower }} != None:
+            for e in entity.{{ relationship.entity1.nameEntity | lower }}:
+                RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'].append(e.{{ relationship.entity1.getPrimaryKey().nameColumn }})
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity %}
+        # OneToMany 2
+        RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = []
+        if entity.{{ relationship.entity2.nameEntity | lower }} != None:
+            for e in entity.{{ relationship.entity2.nameEntity | lower }}:
+                RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'].append(e.{{ relationship.entity2.getPrimaryKey().nameColumn }})
+        {% else %}
+        # OneToMany 1
+        if entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} != None:
+            RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}
+        else:
+            RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = None
+        {%- endif %}
+        {%- else %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToMany 2
+        RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'] = []
+        if entity.{{ relationship.entity2.nameEntity | lower }} != None:
+            for e in entity.{{ relationship.entity2.nameEntity | lower }}:
+                RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}'].append(e.{{ relationship.entity2.getPrimaryKey().nameColumn }})
+        {% else %}
+        # ManyToMany 1
+        RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'] = []
+        if entity.{{ relationship.entity1.nameEntity | lower }} != None:
+            for e in entity.{{ relationship.entity1.nameEntity | lower }}:
+                RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}'].append(e.{{ relationship.entity1.getPrimaryKey().nameColumn }}){%- endif %}
+        {%- endif %}
+        {% endfor %}
+        dto = {{ entity.nameEntity }}DTO(entity.{{ entity.getPrimaryKey().nameColumn }}
+        {%- if entity.columns | length > 0 %}
+            {%- for column in entity.columns[:-1] -%}
+            , entity.{{ column.nameColumn }}
+            {%- endfor -%}
+            , entity.{{ entity.columns[-1].nameColumn }}
+        {%- endif -%}
+        {%- if entity.relationships | length > 0 %}
+        {% for relationship in entity.relationships -%}
+            , {% if relationship.entity1 == entity %}RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}']{% else %}RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}']{% endif %}{% if loop.last %}){% endif %}
+        {%- endfor %}
+        {%- else %}
+        )
+        {%- endif %}
+
+        return dto
+
+    def toEntity(self, dto: {{ entity.nameEntity }}DTO) -> {{ entity.nameEntity }}Entity:
+        {% for relationship in entity.relationships -%}
+        from src.Services.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service import {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service
+        from .{% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur import {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur
+        {% endfor %}
+        {% for relationship in entity.relationships %}
+        self.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}Service = {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service()
+        self.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}Mappeur = {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur()
+        {% endfor %}
+
+        dto_keys = dto.keys()
+
+        entity = {{ entity.nameEntity }}Entity()
+        if '{{ entity.getPrimaryKey().nameColumn }}' in dto_keys and dto['{{ entity.getPrimaryKey().nameColumn }}'] != None:
+            entity.{{ entity.getPrimaryKey().nameColumn }} = dto['{{ entity.getPrimaryKey().nameColumn }}']
+        else:
+            entity.{{ entity.getPrimaryKey().nameColumn }} = None
+        {% if entity.columns | length > 0 %}
+        {%- for column in entity.columns[:-1] -%}
+        if '{{ column.nameColumn }}' in dto_keys and dto['{{ entity.columns.nameColumn }}'] != None:
+            entity.{{ column.nameColumn }} = dto['{{ column.nameColumn }}']
+        else:
+            entity.{{ column.nameColumn }} = None
+        {% endfor -%}
+        if '{{ entity.columns[-1].nameColumn }}' in dto_keys and dto['{{ entity.columns[-1].nameColumn }}'] != None:
+            entity.{{ entity.columns[-1].nameColumn }} = dto['{{ entity.columns[-1].nameColumn }}']
+        else:
+            entity.{{ entity.columns[-1].nameColumn }} = None
+        {% endif %}
+        {%- for relationship in entity.relationships -%}
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity %}
+        # OneToOne 2
+        if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
+            entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = dto['{{ relationship.entity2.nameEntity | lower }}']
+        else:
+            entity.{{ relationship.entity2.nameEntity | lower }} = None
+        {% else %}
+        # OneToOne 1
+        if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
+            entity.{{ relationship.entity1.nameEntity | lower }} = self.{{ relationship.entity1.nameEntity | lower }}Service.get(dto['{{ relationship.entity1.nameEntity | lower }}'])
+        else:
+            entity.{{ relationship.entity1.nameEntity | lower }} = None
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToOne 2
+        if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
+            entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = dto['{{ relationship.entity2.nameEntity | lower }}']
+        else:
+            entity.{{ relationship.entity2.nameEntity | lower }} = None
+        {% else %}
+        # ManyToOne 1
+        entity.{{ relationship.entity1.nameEntity | lower }} = []
+        if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
+            for id in dto['{{ relationship.entity1.nameEntity | lower }}']:
+                dto2 = self.{{ relationship.entity1.nameEntity | lower }}Service.get(id)
+                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity }}Mappeur.toEntity(dto2))
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity %}
+        # OneToMany 2
+        entity.{{ relationship.entity2.nameEntity | lower }} = []
+        if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
+            for id in dto['{{ relationship.entity2.nameEntity | lower }}']:
+                dto2 = self.{{ relationship.entity2.nameEntity | lower }}Service.get(id)
+                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity }}Mappeur.toEntity(dto2))
+        {% else %}
+        # OneToMany 1
+        if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
+            entity.{{ relationship.entity1.nameEntity | lower }} = self.{{ relationship.entity1.nameEntity | lower }}Service.get(dto['{{ relationship.entity1.nameEntity | lower }}'])
+        else:
+            entity.{{ relationship.entity1.nameEntity | lower }} = None
+        {%- endif %}
+        {%- else %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToMany 2
+        entity.{{ relationship.entity2.nameEntity | lower }} = []
+        if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
+            for id in dto['{{ relationship.entity2.nameEntity | lower }}']:
+                dto2 = self.{{ relationship.entity2.nameEntity | lower }}Service.get(id)
+                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity }}Mappeur.toEntity(dto2))
+        {% else %}
+        # ManyToMany 1
+        entity.{{ relationship.entity1.nameEntity | lower }} = []
+        if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
+            for id in dto['{{ relationship.entity1.nameEntity | lower }}']:
+                dto2 = self.{{ relationship.entity1.nameEntity | lower }}Service.get(id)
+                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity }}Mappeur.toEntity(dto2))
+        {%- endif %}
+        {%- endif %}
+        {% endfor %}
+
+        return entity

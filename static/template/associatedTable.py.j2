@@ -1,0 +1,7 @@
+from src import db
+from . import {{ entity.entity1.nameEntity }}Entity, {{ entity.entity2.nameEntity }}Entity
+
+{{ entity.name }} = db.Table('{{ entity.name }}',
+    db.Column('{{ entity.entity1.subName }}_{{ entity.entity1.getPrimaryKey().nameColumn }}', db.Integer(), db.ForeignKey('{{ entity.entity1.nameEntity | lower }}_{{ entity.entity1.subName }}.{{ entity.entity1.subName }}_{{ entity.entity1.getPrimaryKey().nameColumn }}')),
+    db.Column('{{ entity.entity2.subName }}_{{ entity.entity2.getPrimaryKey().nameColumn }}', db.Integer(), db.ForeignKey('{{ entity.entity2.nameEntity | lower }}_{{ entity.entity2.subName }}.{{ entity.entity2.subName }}_{{ entity.entity2.getPrimaryKey().nameColumn }}'))
+)

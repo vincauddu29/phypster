@@ -1,0 +1,131 @@
+from unittest import TestCase
+from faker import Faker
+from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+
+def create_list(nb: int):
+    fake = Faker()
+    fake.seed(0)
+    l = []
+    for i in range(nb):
+        l.append(fake.pyint())
+
+    return l
+
+class {{ entity.nameEntity }}EntityTest(TestCase):
+    fake = Faker()
+    fake.seed(0)
+    {%- for step_var in ['DEFAULT', 'UPDATE'] %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = fake.pyint()
+    {% for column in entity.columns %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_{{ step_var }}=
+    {%- if column.typeData == 'String' -%}
+        fake.word()
+    {%- elif column.typeData == 'Integer' -%}
+        fake.pyint()
+    {%- elif column.typeData == 'Numeric' -%}
+        fake.pydecimal()
+    {%- elif column.typeData == 'Float' -%}
+        fake.pyfloat()
+    {%- elif column.typeData == 'DateTime' -%}
+        fake.date_time()
+    {%- elif column.typeData == 'Boolean' -%}
+        fake.pybool()
+    {%- endif %}
+    {%- endfor %}
+    {%- for relationship in entity.relationships -%}    
+    {%- if relationship.isOneToOne %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ step_var }} = fake.pyint()
+    {%- else %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = [fake.pyint()]
+    {%- endif %}
+    {%- elif relationship.isManyToOne %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ relationship.entity2.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = fake.pyint()
+    {% else %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ step_var }} = create_list(3)
+    {%- endif %}
+    {%- elif relationship.isOneToMany %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ step_var }} = create_list(3)
+    {%- else %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = fake.pyint()
+    {%- endif %}
+    {%- else %}
+    {%- if relationship.entity1 == entity %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ step_var }} = create_list(3)
+    {%- else %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ step_var }} = create_list(3)
+    {%- endif %}
+    {%- endif %}
+    {%- endfor %}
+    {%- endfor %}
+
+    def test_createDTO(self):
+        dto = {{ entity.nameEntity }}DTO(self.{{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- for column in entity.columns -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
+        {%- endfor %}
+        {% if entity.relationships | length > 0 %}
+        {%- for relationship in entity.relationships -%}
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ relationship.entity2.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- else -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_DEFAULT
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- endif %}
+        {%- else -%}
+        {%- if relationship.entity1 == entity -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else -%}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_DEFAULT
+        {%- endif -%}
+        {%- endif -%}
+        {%- if loop.last -%} ) {%- endif %}
+        {%- endfor -%}
+        {%- else -%}
+        )
+        {% endif %}
+
+        {% for column in entity.columns %}
+        assert dto['{{ column.nameColumn }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
+        {%- endfor -%}
+        {%- for relationship in entity.relationships %}
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity %}
+        assert dto['{{ relationship.entity2.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else %}
+        assert dto['{{ relationship.entity1.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity %}
+        assert dto['{{ relationship.entity2.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_{{ relationship.entity2.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- else %}
+        assert dto['{{ relationship.entity1.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_DEFAULT
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity %}
+        assert dto['{{ relationship.entity2.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else %}
+        assert dto['{{ relationship.entity1.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_{{ relationship.entity1.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        {%- endif %}
+        {%- else %}
+        {%- if relationship.entity1 == entity %}
+        dto['{{ relationship.entity2.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity2.nameEntity | upper }}_DEFAULT
+        {%- else %}
+        assert dto['{{ relationship.entity1.nameEntity | lower }}'] == self.{{ entity.nameEntity | upper }}_ENTITY_{{ relationship.entity1.nameEntity | upper }}_DEFAULT
+        {%- endif -%}
+        {%- endif -%}
+        {%- endfor %}

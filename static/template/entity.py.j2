@@ -1,0 +1,107 @@
+from src import db
+{% for relationship in entity.relationships -%}
+    {%- if loop.first %}from . import {% endif -%}{% if relationship.entity1 != entity%} {{ relationship.entity1.nameEntity }}Entity {%- else %} {{ relationship.entity2.nameEntity }}Entity {%- endif %}{% if not loop.last %}, {% endif -%}
+{% endfor %}
+{% for relationship in entity.relationships -%}
+    {% if relationship.isManyToMany %}from . import {{ relationship.associateTable.name }}{% endif %}
+{%- endfor %}
+
+class {{ entity.nameEntity }}Entity(db.Model):
+    __tablename__ = '{{ entity.nameEntity | lower }}_{{ entity.subName }}'
+    {{ entity.getPrimaryKey().nameColumn }} = db.Column('{{ entity.subName }}_{{ entity.getPrimaryKey().nameColumn }}', db.{{ entity.getPrimaryKey().typeData }}, primary_key = True)
+    {% for column in entity.columns -%}
+    {{ column.nameColumn }} = db.Column('{{ entity.subName }}_{{ column.nameColumn }}', db.{{ column.typeData }}, nullable = {{ column.nullable }})
+    {% endfor -%}
+
+    {%- for relationship in entity.relationships -%}
+    {%- if relationship.isOneToOne %}
+    {%- if relationship.entity1 == entity %}
+    # OneToOne
+    {{ relationship.entity2.nameEntity | lower }} = db.relationship('{{ relationship.entity2.nameEntity }}Entity', backref = '{{ entity.nameEntity | lower }}', uselist = False)
+    {% else %}
+    # OneToOne
+    {{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = db.Column(db.Integer, db.ForeignKey('{{ relationship.entity1.nameEntity | lower}}_{{ relationship.entity1.subName }}.{{ relationship.entity1.subName }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}'), nullable = False)
+    {%- endif %}
+    {%- elif relationship.isManyToOne %}
+    {%- if relationship.entity1 == entity %}
+    # ManyToOne
+    {{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = db.Column(db.Integer, db.ForeignKey('{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.subName }}.{{ relationship.entity2.subName }}_{{ relationship.entity2.getPrimaryKey().nameColumn }}'), nullable = False)
+    {% else %}
+    # ManyToOne
+    {{ relationship.entity1.nameEntity | lower }} = db.relationship('{{ relationship.entity1.nameEntity }}Entity', backref = '{{ entity.nameEntity | lower }}', uselist = True)
+    {%- endif %}
+    {%- elif relationship.isOneToMany %}
+    {%- if relationship.entity1 == entity %}
+    # OneToMany
+    {{ relationship.entity2.nameEntity | lower }} = db.relationship('{{ relationship.entity2.nameEntity }}Entity', backref = '{{ entity.nameEntity | lower }}', uselist = True)
+    {% else %}
+    # OneToMany
+    {{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = db.Column(db.Integer, db.ForeignKey('{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.subName }}.{{ relationship.entity1.subName }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}'), nullable = False)
+    {%- endif %}
+    {%- else %}
+    {%- if relationship.entity1 == entity %}
+    # ManyToMany
+    {{ relationship.entity2.nameEntity | lower }} = db.relationship('{{ relationship.entity2.nameEntity }}Entity', secondary = '{{ relationship.associateTable.name }}', back_populates = '{{ entity.nameEntity | lower }}', lazy = 'dynamic')
+    {% else %}
+    # ManyToMany
+    {{ relationship.entity1.nameEntity | lower }} = db.relationship('{{ relationship.entity1.nameEntity }}Entity', secondary = '{{ relationship.associateTable.name }}', back_populates = '{{ entity.nameEntity | lower }}', lazy = 'dynamic')
+    {%- endif %}
+    {%- endif %}
+    {% endfor %}
+
+    def __repr__(self):
+        return "<{{ entity.nameEntity }}Entity, {{ entity.getPrimaryKey().nameColumn }} = {0}>".format(self.{{ entity.getPrimaryKey().nameColumn }})
+
+{#
+    def toString(self):
+        s = "{{ entity.getPrimaryKey().nameColumn }} = {0}".format(self.{{ entity.getPrimaryKey().nameColumn }})
+        {%- for column in entity.columns %}
+        s += ",\n {{ column.nameColumn }} = {0}".format(self.{{ column.nameColumn }})
+        {%- endfor %}
+        {%- for relationship in entity.relationships -%}
+        {%- if relationship.isOneToOne %}
+        {%- if relationship.entity1 == entity %}
+        # OneToOne
+        s += ",\n {{ relationship.entity2.nameEntity | lower }} = {0}".format(self.{{ relationship.entity2.nameEntity | lower }}.toString())
+        {%- else %}
+        # OneToOne
+        s += ",\n {{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {0}".format(self.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }})
+        {%- endif %}
+        {%- elif relationship.isManyToOne %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToOne
+        s += ",\n {{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = {0}".format(self.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }})
+        {%- else %}
+        # ManyToOne
+        s += ",\n {{ relationship.entity1.nameEntity | lower }} = {0}".format(self.{{ relationship.entity1.nameEntity | lower }}.toString())
+        {%- endif %}
+        {%- elif relationship.isOneToMany %}
+        {%- if relationship.entity1 == entity %}
+        # OneToMany
+        s += ",\n {{ relationship.entity2.nameEntity | lower }} = {0}".format(self.{{ relationship.entity2.nameEntity | lower }}.toString())
+        {%- else %}
+        # OneToMany
+        s += ",\n {{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {0}".format(self.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }})
+        {%- endif %}
+        {%- else %}
+        {%- if relationship.entity1 == entity %}
+        # ManyToMany
+        s += ",\n {{ relationship.entity2.nameEntity | lower }} = {0}".format(self.{{ relationship.entity2.nameEntity | lower }}.toString())
+        {% else %}
+        # ManyToMany
+        s += ",\n {{ relationship.entity1.nameEntity | lower }} = {0}".format(self.{{ relationship.entity1.nameEntity | lower }}.toString())
+        {%- endif %}
+        {%- endif %}
+        {% endfor %}
+
+        print(s)
+
+    {% for column in entity.columns -%}
+    def get{{ column.nameColumn[0] | upper }}{{ column.nameColumn[1:] }}(self):
+        return self.{{ entity.subName }}_{{ column.nameColumn }}
+
+    def set{{ column.nameColumn[0] | upper }}{{ column.nameColumn[1:] }}(self, value):
+        self.{{ entity.subName }}_{{ column.nameColumn }} = value
+        
+    {% endfor %}
+#}

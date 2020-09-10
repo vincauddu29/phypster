@@ -1,0 +1,37 @@
+from src.Ressources.{{ entity.nameEntity }}Ressource import {{ entity.nameEntity }}Ressource
+from src.Mappeurs.{{ entity.nameEntity }}Mappeur import {{ entity.nameEntity }}Mappeur
+from ..Mocks.{{ entity.nameEntity }}Mock import {{ entity.nameEntity }}Mock
+from src import app
+from unittest import TestCase
+
+class {{ entity.nameEntity }}RessourceTest(TestCase):
+
+    {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
+    {{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
+
+    def test_getAll_empty(self):
+        with app.test_client() as c:
+            rv = c.get('/{{ entity.nameEntity }}/')
+            json_data = rv.get_json()
+            print("json_data = ", json_data)
+            assert json_data == {"msg": "Not Found"}
+            assert rv.status_code == 404
+
+    def test_get_empty(self):
+        with app.test_client() as c:
+            rv = c.get('/{{ entity.nameEntity }}/1')
+            json_data = rv.get_json()
+            assert rv.status_code == 404
+            assert json_data["msg"] == "Not Found"
+
+    def test_post_valid_dto(self):
+        entity = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+        dto = self.{{ entity.nameEntity | lower }}Mappeur.toDTO(entity)
+        with app.test_client() as c:
+            rv = c.post('/{{ entity.nameEntity }}', json=dto)
+            json_data = rv.get_json()
+            assert rv.status_code == 201
+            assert json_data['{{ entity.getPrimaryKey().nameColumn }}'] != None
+            {%- for column in entity.columns %}
+            assert dto['{{ column.nameColumn }}'] == json_data['{{ column.nameColumn }}']
+            {%- endfor %}

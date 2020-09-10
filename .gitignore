@@ -1,0 +1,6 @@
+src
+migrations
+Tests
+.vscode
+*.log
+__pycache__
