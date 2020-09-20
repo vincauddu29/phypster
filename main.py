@@ -90,6 +90,9 @@ def init():
         if list_directories_name[directory_name]:
             createDirectory("Tests/" + directory_name)
 
+    # helpers Test
+    shutil.copy(getPathFileInStatic("helpersTest.py"), "Tests/helpersTest.py")
+
     createDirectory("Tests/Mocks")
 
     writeAppFile()
@@ -249,6 +252,10 @@ def generateRessourcesTestsFiles(entity):
     writeFile("template/ressourceTest.py.j2", "Tests/Ressources/test_{0}RessourceTest.py".format(entity.nameEntity), entity)
     info("[x] {0}RessourceTest file created".format(entity.nameEntity))
 
+def generateRepositoriesTestsFiles(entity):
+    writeFile("template/repositoryTest.py.j2", "Tests/Repositories/test_{0}RepositoryTest.py".format(entity.nameEntity), entity)
+    info("[x] {0}RepositoryTest file created".format(entity.nameEntity))
+
 def generateMocksTestsFiles(entity):
     writeFile("template/mock.py.j2", "Tests/Mocks/{0}Mock.py".format(entity.nameEntity), entity)
     info("[x] {0}Mock file created".format(entity.nameEntity))
@@ -265,10 +272,11 @@ def generateFiles():
         generateRessourcesFiles(entity)
 
         # tests
-        generateEntitiesTestsFiles(entity)
-        generateDTOsTestsFiles(entity)
-        generateMappeursTestsFiles(entity)
-        generateRessourcesTestsFiles(entity)
+        # generateEntitiesTestsFiles(entity)
+        # generateDTOsTestsFiles(entity)
+        # generateMappeursTestsFiles(entity)
+        # generateRessourcesTestsFiles(entity)
+        generateRepositoriesTestsFiles(entity)
         generateMocksTestsFiles(entity)
 
     for associateTable in ASSOCIATETABLES:

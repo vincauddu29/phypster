@@ -1,9 +1,10 @@
 from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
 from faker import Faker
+from src import app, db
 
 class {{ entity.nameEntity }}Mock:
     fake = Faker()
-    fake.seed(0)
+    fake.seed({{ entity.getRandomInt() }})
     {%- for step_var in ['DEFAULT', 'UPDATE'] %}
     {{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_{{ step_var }}= fake.pyint()
     {% for column in entity.columns %}
@@ -24,7 +25,7 @@ class {{ entity.nameEntity }}Mock:
     {%- endfor %}
     {%- endfor %}
 
-    def createEntityWithoutRelationship(self):
+    def createEntityWithoutRelationship(self) -> {{ entity.nameEntity }}Entity:
         {{ entity.nameEntity | lower }}Entity = {{ entity.nameEntity }}Entity()
         {{ entity.nameEntity | lower }}Entity.{{ entity.getPrimaryKey().nameColumn }} = self.{{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_DEFAULT
         {%- for column in entity.columns %}
@@ -32,66 +33,154 @@ class {{ entity.nameEntity }}Mock:
         {%- endfor %}
         return {{ entity.nameEntity | lower }}Entity
 
-    def createEntityWithRelationship(self):
+    def createEntityWithRelationship(self
+        {%- for relationship in entity.relationships -%}    
+            {%- if relationship.isOneToOne -%}
+                {%- if relationship.entity1 == entity -%}
+                    , {{ relationship.entity2.nameEntity | lower }} = None
+                {%- else -%}
+                    , {{ relationship.entity1.nameEntity | lower }} = None
+                {%- endif -%}
+            {%- elif relationship.isManyToOne -%}
+                {%- if relationship.entity1 == entity -%}
+                    , {{ relationship.entity2.nameEntity | lower }} = None
+                {%- else -%}
+                    , {{ relationship.entity1.nameEntity | lower }} = None
+                {%- endif -%}
+            {%- elif relationship.isOneToMany -%}
+                {%- if relationship.entity1 == entity -%}
+                    , {{ relationship.entity2.nameEntity | lower }} = None
+                {%- else -%}
+                    , {{ relationship.entity1.nameEntity | lower }} = None
+                {%- endif -%}
+            {%- else -%}
+                {%- if relationship.entity1 == entity -%}
+                    , {{ relationship.entity2.nameEntity | lower }} = None
+                {%- else -%}
+                    , {{ relationship.entity1.nameEntity | lower }} = None
+                {%- endif -%}
+            {%- endif -%}
+        {%- endfor -%}
+    ) -> {{ entity.nameEntity }}Entity:
         {%- for relationship in entity.relationships -%}    
         {%- if relationship.isOneToOne %}
             {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- elif relationship.isManyToOne %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {% else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- elif relationship.isOneToMany %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- else %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
+        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- endif %}
         {%- endfor %}
         entity = self.createEntityWithoutRelationship()
-        {%- for relationship in entity.relationships -%}    
-        {%- if relationship.isOneToOne %}
-        {%- if relationship.entity1 == entity %}
-        {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-        entity.{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithoutRelationship()
-        {%- else %}
-        entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = self.fake.pyint()
+        {%- if entity.relationships | length > 0 %}
+        with app.app_context():
+            {%- for relationship in entity.relationships -%}    
+            {%- if relationship.isOneToOne %}
+            {%- if relationship.entity1 == entity %}
+            if {{ relationship.entity2.nameEntity | lower }} == None:
+                {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
+                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
+                {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
+                entity.{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
+            else:
+                entity.{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}
+            {%- else %}
+            if {{ relationship.entity1.nameEntity | lower }} == None:
+                {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
+                {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+                entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}Entity.{{ relationship.entity1.getPrimaryKey().nameColumn }}
+            else:
+                entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}.{{ relationship.entity1.getPrimaryKey().nameColumn }}
+            {%- endif %}
+            {%- elif relationship.isManyToOne %}
+            {%- if relationship.entity1 == entity %}
+            if {{ relationship.entity2.nameEntity | lower }} == None:
+                {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
+                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
+                {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
+                entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = {{ relationship.entity2.nameEntity | lower }}Entity.{{ relationship.entity2.getPrimaryKey().nameColumn }}
+            else:
+                entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = {{ relationship.entity2.nameEntity | lower }}.{{ relationship.entity2.getPrimaryKey().nameColumn }}  
+            {% else %}
+            if {{ relationship.entity1.nameEntity | lower }} == None:
+                {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
+                {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+                {{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}Entity
+            entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower }}]
+            {%- endif %}
+            {%- elif relationship.isOneToMany %}
+            {%- if relationship.entity1 == entity %}
+            if {{ relationship.entity2.nameEntity | lower }} == None:
+                {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
+                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
+                {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
+                {{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
+            entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}]
+            {%- else %}
+            if {{ relationship.entity1.nameEntity | lower }} == None:
+                {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
+                {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+                entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}Entity.{{ relationship.entity1.getPrimaryKey().nameColumn }}
+            else:
+                entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}.{{ relationship.entity1.getPrimaryKey().nameColumn }}
+            {%- endif %}
+            {%- else %}
+            {%- if relationship.entity1 == entity %}
+            if {{ relationship.entity2.nameEntity | lower }} == None:
+                {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
+                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
+                {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
+                {{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
+            entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}]
+            {%- else %}
+            if {{ relationship.entity1.nameEntity | lower }} == None:
+                {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
+                {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
+                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+                {{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}Entity
+            entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower }}]
+            {%- endif -%}
+            {%- endif -%}
+            {%- endfor %}
         {%- endif %}
-        {%- elif relationship.isManyToOne %}
-        {%- if relationship.entity1 == entity %}
-        entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = self.fake.pyint()
-        {% else %}
-        {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-        entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithoutRelationship()]
-        {%- endif %}
-        {%- elif relationship.isOneToMany %}
-        {%- if relationship.entity1 == entity %}
-        {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-        entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithoutRelationship()]
-        {%- else %}
-        entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = self.fake.pyint()
-        {%- endif %}
-        {%- else %}
-        {%- if relationship.entity1 == entity %}
-        {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-        entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithoutRelationship()]
-        {%- else %}
-        {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-        entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower}}Mock.createEntityWithoutRelationship()]
-        {%- endif -%}
-        {%- endif -%}
-        {%- endfor %}
-
         return entity
+
+    def createMalformedEntity(self):
+        return {{ entity.nameEntity }}Entity()

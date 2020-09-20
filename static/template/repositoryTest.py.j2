@@ -1,0 +1,135 @@
+from src import app, logger
+from unittest import TestCase
+from src import app
+from Tests.helpersTest import clearTables
+from ..Mocks.{{ entity.nameEntity }}Mock import {{ entity.nameEntity }}Mock
+from src.Repositories.{{ entity.nameEntity }}Repository import {{ entity.nameEntity }}Repository
+
+class {{ entity.nameEntity }}RepositoryTest(TestCase):
+
+    {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
+    {{ entity.nameEntity | lower }}Repository = {{ entity.nameEntity }}Repository()
+
+    def setUp(self):
+        logger.debug("{{ entity.nameEntity }}RepositoryTest, setUp call")
+        clearTables()
+
+    def test_save_without_relationship(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_save_without_relationship, call")
+        entityWithout = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+        nullable = True
+        with app.app_context() as ctx:
+            res = self.{{ entity.nameEntity | lower }}Repository.save(entityWithout)
+
+    {%- if entity.relationships | length > 0 %}
+        {%- for relationship in entity.relationships -%}
+            {%- if relationship.isOneToOne %}
+            {%- if relationship.entity1 == entity %}
+            # OneToOne 2
+            nullable = nullable and True
+            {% else %}
+            # OneToOne 1
+            nullable = nullable and True
+            {%- endif %}
+            {%- elif relationship.isManyToOne %}
+            {%- if relationship.entity1 == entity %}
+            # ManyToOne 2
+            nullable = nullable and False
+            {% else %}
+            # ManyToOne 1
+            nullable = nullable and True
+            {%- endif %}
+            {%- elif relationship.isOneToMany %}
+            {%- if relationship.entity1 == entity %}
+            # OneToMany 2
+            nullable = nullable and True
+            {% else %}
+            # OneToMany 1
+            nullable = nullable and False
+            {%- endif %}
+            {%- else %}
+            {%- if relationship.entity1 == entity %}
+            # ManyToMany 2
+            nullable = nullable and True
+            {% else %}
+            # ManyToMany 1
+            nullable = nullable and True
+            {%- endif %}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+            if nullable:
+                assert res != None
+                assert res.{{ entity.getPrimaryKey().nameColumn }} != None
+            else:
+                assert res == None
+
+    def test_save_with_relationship(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_save_with_relationship, call")
+        with app.app_context() as ctx:
+            entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+            res = self.{{ entity.nameEntity | lower }}Repository.save(entityWith)
+            assert res.{{ entity.getPrimaryKey().nameColumn }} == entityWith.{{ entity.getPrimaryKey().nameColumn }}
+
+    def test_save_with_relationship_check_auto_increment_id(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_save_with_relationship_check_auto_increment_id, call")
+        with app.app_context() as ctx:
+            entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+            entityWith.{{ entity.getPrimaryKey().nameColumn }} = None
+            res = self.{{ entity.nameEntity | lower }}Repository.save(entityWith)
+            assert res.{{ entity.getPrimaryKey().nameColumn }} != None
+
+    def test_get_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_get_empty, call")
+        with app.app_context() as ctx:
+            res = self.{{ entity.nameEntity | lower }}Repository.get()
+
+            assert res != None
+            assert isinstance(res, list)
+            assert len(res) == 0
+
+    def test_get_not_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_get_not_empty, call")
+        with app.app_context() as ctx:
+            entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+            self.{{ entity.nameEntity | lower }}Repository.save(entityWith)
+            res = self.{{ entity.nameEntity | lower }}Repository.get()
+
+            assert res != None
+            assert isinstance(res, list)
+            assert len(res) == 1
+
+    def test_getById_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_getById_empty, call")
+        entityWithout = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+        with app.app_context() as ctx:
+            res = self.{{ entity.nameEntity | lower }}Repository.getById(entityWithout.{{ entity.getPrimaryKey().nameColumn }})
+
+            assert res == None
+
+    def test_getById_not_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_getById_not_empty, call")
+        with app.app_context() as ctx:
+            entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+            self.{{ entity.nameEntity | lower }}Repository.save(entityWith)
+            res = self.{{ entity.nameEntity | lower }}Repository.getById(entityWith.{{ entity.getPrimaryKey().nameColumn }})
+
+            assert res != None
+            assert res.{{ entity.getPrimaryKey().nameColumn }} == entityWith.{{ entity.getPrimaryKey().nameColumn }}
+
+    def test_remove_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_remove_empty, call")
+        with app.app_context() as ctx:
+            entityWithout = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+            res = self.{{ entity.nameEntity | lower }}Repository.remove(entityWithout)
+
+            assert res == False
+
+    def test_remove_not_empty(self):
+        logger.info("{{ entity.nameEntity }}RepositoryTest.test_remoce_not_empty, call")
+        with app.app_context() as ctx:
+            entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+            entity = self.{{ entity.nameEntity | lower }}Repository.save(entityWith)
+            res = self.{{ entity.nameEntity | lower }}Repository.remove(entity)
+
+            assert res == True

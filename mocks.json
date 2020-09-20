@@ -12,8 +12,8 @@
         {
             "name": "Child",
             "columns": [
-                ["identity", "Integer", true, false],
-                ["name", "String", false, true]
+                ["identity", "Integer", true, true],
+                ["name", "String", false, false]
             ],
             "relationships": [
                 {
@@ -56,14 +56,6 @@
                     "entity2": "Child",
                     "typeRelation": "Many to One"
                 }
-            ]
-        },
-        {
-            "name": "Test",
-            "columns": [
-                ["name", "String", false, true]
-            ],
-            "relationships": [
             ]
         }
     ]

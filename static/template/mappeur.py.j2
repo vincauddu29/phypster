@@ -99,7 +99,7 @@ class {{ entity.nameEntity }}Mappeur:
             entity.{{ entity.getPrimaryKey().nameColumn }} = None
         {% if entity.columns | length > 0 %}
         {%- for column in entity.columns[:-1] -%}
-        if '{{ column.nameColumn }}' in dto_keys and dto['{{ entity.columns.nameColumn }}'] != None:
+        if '{{ column.nameColumn }}' in dto_keys and dto['{{ column.nameColumn }}'] != None:
             entity.{{ column.nameColumn }} = dto['{{ column.nameColumn }}']
         else:
             entity.{{ column.nameColumn }} = None
@@ -161,14 +161,14 @@ class {{ entity.nameEntity }}Mappeur:
         if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity2.nameEntity | lower }}']:
                 dto2 = self.{{ relationship.entity2.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity }}Mappeur.toEntity(dto2))
+                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity | lower }}Mappeur.toEntity(dto2))
         {% else %}
         # ManyToMany 1
         entity.{{ relationship.entity1.nameEntity | lower }} = []
         if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity1.nameEntity | lower }}']:
                 dto2 = self.{{ relationship.entity1.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity }}Mappeur.toEntity(dto2))
+                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity | lower }}Mappeur.toEntity(dto2))
         {%- endif %}
         {%- endif %}
         {% endfor %}

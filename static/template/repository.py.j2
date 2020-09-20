@@ -3,30 +3,42 @@ from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Enti
 from typing import List
 
 class {{ entity.nameEntity }}Repository:
-    def __init__(self):
-        pass
-
-    def save(self, entity) -> {{ entity.nameEntity }}Entity:
+    def save(self, entity: {{ entity.nameEntity }}Entity) -> {{ entity.nameEntity }}Entity:
+        logger.debug("{{ entity.nameEntity }}Repository.save call")
         try:
             db.session.add(entity)
             db.session.flush()
+            id = entity.{{ entity.getPrimaryKey().nameColumn }}
             db.session.commit()
-            return entity
+            return self.getById(id)
         except Exception as e:
             logger.error("{{ entity.nameEntity }}Repository.save, {0}".format(e))
 
+    def getById(self, id: int) -> {{ entity.nameEntity }}Entity:
+        logger.debug("{{ entity.nameEntity }}Repository.getById call")
+        try:
+            return db.session.query({{ entity.nameEntity }}Entity).filter_by({{ entity.getPrimaryKey().nameColumn }} = id).first()
+        except Exception as e:
+            logger.error("{{ entity.nameEntity }}Repository.getById, {0}".format(e))
+            return None
+
     def get(self) -> List[{{ entity.nameEntity }}Entity]:
+        logger.debug("{{ entity.nameEntity }}Repository.get call")
         try:
             return db.session.query({{ entity.nameEntity }}Entity).all()
         except Exception as e:
             logger.error("{{ entity.nameEntity }}Repository.get, {0}".format(e))
             return list()
 
-    def remove(self, entity) -> bool:
+    def remove(self, entity: {{ entity.nameEntity }}Entity) -> bool:
+        logger.debug("{{ entity.nameEntity }}Repository.remove call")
         try:
-            db.session.delete(entity)
-            db.session.commit()
-            return True
+            if self.getById(entity.{{ entity.getPrimaryKey().nameColumn }}) != None:
+                db.session.delete(entity)
+                db.session.commit()
+                return True
+            else:
+                return False
         except Exception as e:
             logger.error("{{ entity.nameEntity }}Repository.remove, {0}".format(e))
             return False

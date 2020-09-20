@@ -60,6 +60,10 @@ class Entity:
             self.primaryKey = Column("id", "Integer", True)
         return self.primaryKey
 
+    def getRandomInt(self) -> int:
+        import random
+        return random.randint(1, 2000)
+
 class AssociateTable:
     def __init__(self, entity1, entity2):
         self.name = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
