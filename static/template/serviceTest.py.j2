@@ -1,0 +1,130 @@
+from src.Services.{{ entity.nameEntity }}Service import {{ entity.nameEntity }}Service
+from src.Mappeurs.{{ entity.nameEntity }}Mappeur import {{ entity.nameEntity }}Mappeur
+from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+from ..Mocks.{{ entity.nameEntity }}Mock import {{ entity.nameEntity }}Mock
+from src import app, db, logger
+from unittest import TestCase
+from Tests.helpersTest import clearTables
+{%- if entity.relationships | length > 0 %}
+{%- for relationship in entity.relationships -%}
+{%- if relationship.entity1 == entity %}
+from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
+{% else %}
+from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+class {{ entity.nameEntity }}ServiceTest(TestCase):
+
+    {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
+    {{ entity.nameEntity | lower }}Service = {{ entity.nameEntity }}Service()
+    {{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
+    {%- if entity.relationships | length > 0 %}
+    {%- for relationship in entity.relationships -%}
+    {%- if relationship.entity1 == entity %}
+    {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
+    {% else %}
+    {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
+    {%- endif %}
+    {%- endfor %}
+    {%- endif %}
+
+    def saveRelationships(self, entity: {{ entity.nameEntity }}Entity):
+        {%- if entity.relationships | length > 0 %}
+        with app.app_context():
+            {%- for relationship in entity.relationships -%}    
+            {%- if relationship.isOneToOne %}
+            {%- if relationship.entity1 == entity %}
+            entity.{{ relationship.entity2.nameEntity | lower }}.{{ entity.nameEntity | lower }} = None #1
+            self.{{ relationship.entity2.nameEntity | lower }}Repository.save(entity.{{ relationship.entity2.nameEntity | lower }})
+            {%- else %}
+            from Tests.Mocks.{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock #2
+            {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+            {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship(id = entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}, {{ entity.nameEntity | lower }} = entity)
+            {{ relationship.entity1.nameEntity | lower }}Entity.{{ entity.nameEntity | lower }} = None
+            self.{{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+            {%- endif %}
+            {%- elif relationship.isManyToOne %}
+            {%- if relationship.entity1 == entity %}
+            from Tests.Mocks.{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock #3
+            {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
+            {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship(id = entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }}, {{ entity.nameEntity | lower }} = entity)
+            {{ relationship.entity2.nameEntity | lower }}Entity.{{ entity.nameEntity | lower }} = []
+            self.{{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
+            {% else %}
+            for e in entity.{{ relationship.entity1.nameEntity | lower }}: #4
+                e.{{ entity.nameEntity | lower }}_{{ entity.getPrimaryKey().nameColumn  }} = entity.{{ entity.getPrimaryKey().nameColumn }}
+                e.{{ entity.nameEntity | lower }} = None
+                self.{{ relationship.entity1.nameEntity | lower }}Repository.save(e)
+            {%- endif %}
+            {%- elif relationship.isOneToMany %}
+            {%- if relationship.entity1 == entity %}
+            for e in entity.{{ relationship.entity2.nameEntity | lower }}: #5
+                e.{{ entity.nameEntity | lower }}_{{ entity.getPrimaryKey().nameColumn  }} = entity.{{ entity.getPrimaryKey().nameColumn }}
+                e.{{ entity.nameEntity | lower }} = None
+                self.{{ relationship.entity2.nameEntity | lower }}Repository.save(e)
+            {%- else %}
+            from Tests.Mocks.{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock #6
+            {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
+            {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship(id = entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }}, {{ entity.nameEntity | lower }} = entity)
+            {{ relationship.entity1.nameEntity | lower }}Entity.{{ entity.nameEntity | lower }} = []
+            self.{{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
+            {%- endif %}
+            {%- else %}
+            {%- if relationship.entity1 == entity %}
+            for e in entity.{{ relationship.entity2.nameEntity | lower }}: #7
+                e.{{ entity.nameEntity | lower }} = []
+                self.{{ relationship.entity2.nameEntity | lower }}Repository.save(e)
+            {%- else %}
+            for e in entity.{{ relationship.entity1.nameEntity | lower }}: #8
+                e.{{ entity.nameEntity | lower }} = []
+                self.{{ relationship.entity1.nameEntity | lower }}Repository.save(e)
+            {%- endif -%}
+            {%- endif -%}
+            {%- endfor %}
+        {%- endif %}
+
+    def setUp(self):
+        logger.debug("{{ entity.nameEntity }}RepositoryTest, setUp call")
+        clearTables()
+        self.entityWith = self.{{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+
+    def test_get_empty(self):
+        logger.debug("{{ entity.nameEntity }}RepositoryTest, test_get_empty call")
+        entityWithout = self.{{ entity.nameEntity | lower }}Mock.createEntityWithoutRelationship()
+        with app.app_context():
+            res = self.{{ entity.nameEntity | lower }}Service.get(entityWithout.{{ entity.getPrimaryKey().nameColumn }})
+
+            assert res == None
+
+    def test_get_not_empty(self):
+        logger.debug("{{ entity.nameEntity }}RepositoryTest, test_get_not_empty call")
+        with app.app_context():
+            entity_dto = self.{{ entity.nameEntity | lower }}Mappeur.toDTO(self.entityWith)
+            {%- if not entity.haveOneToManyOrManyToOne() %}
+            self.saveRelationships(self.entityWith)
+            self.{{ entity.nameEntity | lower }}Service.add(entity_dto)
+
+            entity = self.{{ entity.nameEntity | lower }}Service.get(self.entityWith.{{ entity.getPrimaryKey().nameColumn }})
+
+            assert entity != None
+            assert entity['{{ entity.getPrimaryKey().nameColumn }}'] == self.entityWith.{{ entity.getPrimaryKey().nameColumn }}
+            {%- else %}
+            # TODO
+            {%- endif %}
+
+    def test_get_not_empty_but_entity_not_saved(self):
+        logger.debug("{{ entity.nameEntity }}RepositoryTest, test_get_not_empty_but_entity_not_saved call")
+
+        with app.app_context():
+            entities = self.{{ entity.nameEntity | lower }}Mock.getNEntity(2)
+            entity_dto = self.{{ entity.nameEntity | lower }}Mappeur.toDTO(entities[0])
+            {%- if not entity.haveOneToManyOrManyToOne() %}
+            self.saveRelationships(entities[0])
+            res = self.{{ entity.nameEntity | lower }}Service.add(entity_dto)
+            entity = self.{{ entity.nameEntity | lower }}Service.get(entities[1].{{ entity.getPrimaryKey().nameColumn }})
+
+            assert entity == None
+            {%- else %}
+            # TODO
+            {%- endif %}

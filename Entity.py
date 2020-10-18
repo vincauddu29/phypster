@@ -64,6 +64,11 @@ class Entity:
         import random
         return random.randint(1, 2000)
 
+    def haveOneToManyOrManyToOne(self):
+        for r in self.relationships:
+            if r.isManyToOne or r.isOneToMany:
+                return True
+
 class AssociateTable:
     def __init__(self, entity1, entity2):
         self.name = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName

@@ -1,14 +1,16 @@
 from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
+import random
 from faker import Faker
 from src import app, db
+from typing import List
 
 class {{ entity.nameEntity }}Mock:
     fake = Faker()
     fake.seed({{ entity.getRandomInt() }})
     {%- for step_var in ['DEFAULT', 'UPDATE'] %}
-    {{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_{{ step_var }}= fake.pyint()
+    # {{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = random.randint(1, 2000)
     {% for column in entity.columns %}
-    {{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_{{ step_var }}=
+    {{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_{{ step_var }} =
     {%- if column.typeData == 'String' -%}
         fake.word()
     {%- elif column.typeData == 'Integer' -%}
@@ -25,15 +27,18 @@ class {{ entity.nameEntity }}Mock:
     {%- endfor %}
     {%- endfor %}
 
-    def createEntityWithoutRelationship(self) -> {{ entity.nameEntity }}Entity:
+    def createEntityWithoutRelationship(self, id = None) -> {{ entity.nameEntity }}Entity:
         {{ entity.nameEntity | lower }}Entity = {{ entity.nameEntity }}Entity()
-        {{ entity.nameEntity | lower }}Entity.{{ entity.getPrimaryKey().nameColumn }} = self.{{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_DEFAULT
+        if id == None:
+            {{ entity.nameEntity | lower }}Entity.{{ entity.getPrimaryKey().nameColumn }} = random.randint(1, 2000)
+        else:
+            {{ entity.nameEntity | lower }}Entity.{{ entity.getPrimaryKey().nameColumn }} = id
         {%- for column in entity.columns %}
         {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} = self.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
         {%- endfor %}
         return {{ entity.nameEntity | lower }}Entity
 
-    def createEntityWithRelationship(self
+    def createEntityWithRelationship(self, id = None
         {%- for relationship in entity.relationships -%}    
             {%- if relationship.isOneToOne -%}
                 {%- if relationship.entity1 == entity -%}
@@ -97,7 +102,7 @@ class {{ entity.nameEntity }}Mock:
                 {%- endif %}
             {%- endif %}
         {%- endfor %}
-        entity = self.createEntityWithoutRelationship()
+        entity = self.createEntityWithoutRelationship(id)
         {%- if entity.relationships | length > 0 %}
         with app.app_context():
             {%- for relationship in entity.relationships -%}    
@@ -105,18 +110,14 @@ class {{ entity.nameEntity }}Mock:
             {%- if relationship.entity1 == entity %}
             if {{ relationship.entity2.nameEntity | lower }} == None:
                 {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
                 {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
                 entity.{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
             else:
                 entity.{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}
             {%- else %}
             if {{ relationship.entity1.nameEntity | lower }} == None:
                 {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
                 {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
                 entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}Entity.{{ relationship.entity1.getPrimaryKey().nameColumn }}
             else:
                 entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}.{{ relationship.entity1.getPrimaryKey().nameColumn }}
@@ -125,18 +126,14 @@ class {{ entity.nameEntity }}Mock:
             {%- if relationship.entity1 == entity %}
             if {{ relationship.entity2.nameEntity | lower }} == None:
                 {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
                 {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
                 entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = {{ relationship.entity2.nameEntity | lower }}Entity.{{ relationship.entity2.getPrimaryKey().nameColumn }}
             else:
                 entity.{{ relationship.entity2.nameEntity | lower }}_{{ relationship.entity2.getPrimaryKey().nameColumn }} = {{ relationship.entity2.nameEntity | lower }}.{{ relationship.entity2.getPrimaryKey().nameColumn }}  
             {% else %}
             if {{ relationship.entity1.nameEntity | lower }} == None:
                 {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
                 {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
                 {{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}Entity
             entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower }}]
             {%- endif %}
@@ -144,17 +141,13 @@ class {{ entity.nameEntity }}Mock:
             {%- if relationship.entity1 == entity %}
             if {{ relationship.entity2.nameEntity | lower }} == None:
                 {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
                 {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
                 {{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
             entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}]
             {%- else %}
             if {{ relationship.entity1.nameEntity | lower }} == None:
                 {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
                 {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
                 entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}Entity.{{ relationship.entity1.getPrimaryKey().nameColumn }}
             else:
                 entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = {{ relationship.entity1.nameEntity | lower }}.{{ relationship.entity1.getPrimaryKey().nameColumn }}
@@ -163,17 +156,13 @@ class {{ entity.nameEntity }}Mock:
             {%- if relationship.entity1 == entity %}
             if {{ relationship.entity2.nameEntity | lower }} == None:
                 {{ relationship.entity2.nameEntity | lower }}Mock = {{ relationship.entity2.nameEntity }}Mock()
-                {{ relationship.entity2.nameEntity | lower }}Repository = {{ relationship.entity2.nameEntity }}Repository()
                 {{ relationship.entity2.nameEntity | lower }}Entity = {{ relationship.entity2.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity2.nameEntity | lower }}Repository.save({{ relationship.entity2.nameEntity | lower }}Entity)
                 {{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}Entity
             entity.{{ relationship.entity2.nameEntity | lower }} = [{{ relationship.entity2.nameEntity | lower }}]
             {%- else %}
             if {{ relationship.entity1.nameEntity | lower }} == None:
                 {{ relationship.entity1.nameEntity | lower }}Mock = {{ relationship.entity1.nameEntity }}Mock()
-                {{ relationship.entity1.nameEntity | lower }}Repository = {{ relationship.entity1.nameEntity }}Repository()
                 {{ relationship.entity1.nameEntity | lower }}Entity = {{ relationship.entity1.nameEntity | lower }}Mock.createEntityWithRelationship({{ entity.nameEntity | lower }} = entity)
-                # {{ relationship.entity1.nameEntity | lower }}Repository.save({{ relationship.entity1.nameEntity | lower }}Entity)
                 {{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}Entity
             entity.{{ relationship.entity1.nameEntity | lower }} = [{{ relationship.entity1.nameEntity | lower }}]
             {%- endif -%}
@@ -184,3 +173,11 @@ class {{ entity.nameEntity }}Mock:
 
     def createMalformedEntity(self):
         return {{ entity.nameEntity }}Entity()
+
+    def getNEntity(self, n: int) -> List[ {{ entity.nameEntity }}Entity]:
+        l = list()
+
+        for _ in range(n):
+            l.append(self.createEntityWithRelationship())
+
+        return l

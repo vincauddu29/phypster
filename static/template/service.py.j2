@@ -9,10 +9,9 @@ class {{ entity.nameEntity }}Service:
         self.{{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
 
     def get(self, id: int) -> {{ entity.nameEntity }}DTO:
-        entities = self.{{ entity.nameEntity | lower }}Repository.get()
-        if len(entities) > 0:
-            {{ entity.nameEntity | lower }}_entity = list(filter(lambda entity : entity.{{ entity.getPrimaryKey().nameColumn }} == id, entities))[0]
-            return self.{{ entity.nameEntity | lower }}Mappeur.toDTO({{ entity.nameEntity | lower }}_entity)
+        entity = self.{{ entity.nameEntity | lower }}Repository.getById(id)
+        if entity != None:
+            return self.{{ entity.nameEntity | lower }}Mappeur.toDTO(entity)
         else:
             return None
 

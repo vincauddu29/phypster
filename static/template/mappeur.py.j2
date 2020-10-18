@@ -82,11 +82,11 @@ class {{ entity.nameEntity }}Mappeur:
 
     def toEntity(self, dto: {{ entity.nameEntity }}DTO) -> {{ entity.nameEntity }}Entity:
         {% for relationship in entity.relationships -%}
-        from src.Services.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service import {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service
+        from src.Repositories.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Repository import {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Repository
         from .{% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur import {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur
         {% endfor %}
         {% for relationship in entity.relationships %}
-        self.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}Service = {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Service()
+        self.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}Repository = {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Repository()
         self.{%- if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}Mappeur = {% if relationship.entity1 == entity %}{{ relationship.entity2.nameEntity }}{% else %}{{ relationship.entity1.nameEntity }}{% endif %}Mappeur()
         {% endfor %}
 
@@ -120,9 +120,9 @@ class {{ entity.nameEntity }}Mappeur:
         {% else %}
         # OneToOne 1
         if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
-            entity.{{ relationship.entity1.nameEntity | lower }} = self.{{ relationship.entity1.nameEntity | lower }}Service.get(dto['{{ relationship.entity1.nameEntity | lower }}'])
+            entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = dto['{{ relationship.entity1.nameEntity | lower }}']
         else:
-            entity.{{ relationship.entity1.nameEntity | lower }} = None
+            entity.{{ relationship.entity1.nameEntity | lower }}_{{ relationship.entity1.getPrimaryKey().nameColumn }} = None
         {%- endif %}
         {%- elif relationship.isManyToOne %}
         {%- if relationship.entity1 == entity %}
@@ -136,8 +136,8 @@ class {{ entity.nameEntity }}Mappeur:
         entity.{{ relationship.entity1.nameEntity | lower }} = []
         if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity1.nameEntity | lower }}']:
-                dto2 = self.{{ relationship.entity1.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity }}Mappeur.toEntity(dto2))
+                dto2 = self.{{ relationship.entity1.nameEntity | lower }}Repository.getById(id)
+                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity | lower }}Mappeur.toEntity(dto2))
         {%- endif %}
         {%- elif relationship.isOneToMany %}
         {%- if relationship.entity1 == entity %}
@@ -145,12 +145,12 @@ class {{ entity.nameEntity }}Mappeur:
         entity.{{ relationship.entity2.nameEntity | lower }} = []
         if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity2.nameEntity | lower }}']:
-                dto2 = self.{{ relationship.entity2.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity }}Mappeur.toEntity(dto2))
+                dto2 = self.{{ relationship.entity2.nameEntity | lower }}Repository.getById(id)
+                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity | lower }}Mappeur.toEntity(dto2))
         {% else %}
         # OneToMany 1
         if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
-            entity.{{ relationship.entity1.nameEntity | lower }} = self.{{ relationship.entity1.nameEntity | lower }}Service.get(dto['{{ relationship.entity1.nameEntity | lower }}'])
+            entity.{{ relationship.entity1.nameEntity | lower }} = self.{{ relationship.entity1.nameEntity | lower }}Repository.getById(dto['{{ relationship.entity1.nameEntity | lower }}'])
         else:
             entity.{{ relationship.entity1.nameEntity | lower }} = None
         {%- endif %}
@@ -160,15 +160,15 @@ class {{ entity.nameEntity }}Mappeur:
         entity.{{ relationship.entity2.nameEntity | lower }} = []
         if '{{ relationship.entity2.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity2.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity2.nameEntity | lower }}']:
-                dto2 = self.{{ relationship.entity2.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity2.nameEntity | lower }}.append(self.{{ relationship.entity2.nameEntity | lower }}Mappeur.toEntity(dto2))
+                e = self.{{ relationship.entity2.nameEntity | lower }}Repository.getById(id)
+                entity.{{ relationship.entity2.nameEntity | lower }}.append(e)
         {% else %}
         # ManyToMany 1
         entity.{{ relationship.entity1.nameEntity | lower }} = []
         if '{{ relationship.entity1.nameEntity | lower }}' in dto_keys and dto['{{ relationship.entity1.nameEntity | lower }}'] != None:
             for id in dto['{{ relationship.entity1.nameEntity | lower }}']:
-                dto2 = self.{{ relationship.entity1.nameEntity | lower }}Service.get(id)
-                entity.{{ relationship.entity1.nameEntity | lower }}.append(self.{{ relationship.entity1.nameEntity | lower }}Mappeur.toEntity(dto2))
+                e = self.{{ relationship.entity1.nameEntity | lower }}Repository.getById(id)
+                entity.{{ relationship.entity1.nameEntity | lower }}.append(e)
         {%- endif %}
         {%- endif %}
         {% endfor %}

@@ -256,6 +256,10 @@ def generateRepositoriesTestsFiles(entity):
     writeFile("template/repositoryTest.py.j2", "Tests/Repositories/test_{0}RepositoryTest.py".format(entity.nameEntity), entity)
     info("[x] {0}RepositoryTest file created".format(entity.nameEntity))
 
+def generateServicesTestsFiles(entity):
+    writeFile("template/serviceTest.py.j2", "Tests/Services/test_{0}ServiceTest.py".format(entity.nameEntity), entity)
+    info("[x] {0}ServiceTest file created".format(entity.nameEntity))
+
 def generateMocksTestsFiles(entity):
     writeFile("template/mock.py.j2", "Tests/Mocks/{0}Mock.py".format(entity.nameEntity), entity)
     info("[x] {0}Mock file created".format(entity.nameEntity))
@@ -272,11 +276,12 @@ def generateFiles():
         generateRessourcesFiles(entity)
 
         # tests
-        # generateEntitiesTestsFiles(entity)
-        # generateDTOsTestsFiles(entity)
-        # generateMappeursTestsFiles(entity)
+        generateEntitiesTestsFiles(entity)
+        generateDTOsTestsFiles(entity)
+        generateMappeursTestsFiles(entity)
         # generateRessourcesTestsFiles(entity)
         generateRepositoriesTestsFiles(entity)
+        generateServicesTestsFiles(entity)
         generateMocksTestsFiles(entity)
 
     for associateTable in ASSOCIATETABLES:

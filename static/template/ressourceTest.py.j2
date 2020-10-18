@@ -9,6 +9,24 @@ class {{ entity.nameEntity }}RessourceTest(TestCase):
     {{ entity.nameEntity | lower }}Mock = {{ entity.nameEntity }}Mock()
     {{ entity.nameEntity | lower }}Mappeur = {{ entity.nameEntity }}Mappeur()
 
+    entity = {{ entity.nameEntity | lower }}Mock.createEntityWithRelationship()
+
+    def setUp(self):
+        logger.debug("{{ entity.nameEntity }}RessourceTest, setUp tearDown")
+        with app.app_context() as ctx:
+            try:
+                db.create_all()
+            except Exception as e:
+                logger.error("{{ entity.nameEntity }}RessourceTest, setUp : error = {0}".format(e))
+
+    def tearDown(self):
+        logger.debug("{{ entity.nameEntity }}RessourceTest, setUp call")
+        with app.app_context as ctx:
+            try:
+                db.drop_all()
+            except Exception as e:
+                logger.error("{{ entity.nameEntity }}RessourceTest, tearDown : error = {0}".format(e))
+
     def test_getAll_empty(self):
         with app.test_client() as c:
             rv = c.get('/{{ entity.nameEntity }}/')
@@ -17,7 +35,7 @@ class {{ entity.nameEntity }}RessourceTest(TestCase):
             assert json_data == {"msg": "Not Found"}
             assert rv.status_code == 404
 
-    def test_get_empty(self):
+{#    def test_get_empty(self):
         with app.test_client() as c:
             rv = c.get('/{{ entity.nameEntity }}/1')
             json_data = rv.get_json()
@@ -34,4 +52,4 @@ class {{ entity.nameEntity }}RessourceTest(TestCase):
             assert json_data['{{ entity.getPrimaryKey().nameColumn }}'] != None
             {%- for column in entity.columns %}
             assert dto['{{ column.nameColumn }}'] == json_data['{{ column.nameColumn }}']
-            {%- endfor %}
+            {%- endfor %} #}
