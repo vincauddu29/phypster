@@ -12,7 +12,7 @@ class {{ entity.nameEntity }}Ressource(Resource):
     {{ entity.nameEntity | lower }}Service = {{ entity.nameEntity }}Service()
     {{ entity.nameEntity | lower }}Parser = {{ entity.nameEntity }}Parser()
 
-    def get(self, {{ entity.nameEntity | lower }}_id):
+    def get(self, {{ entity.nameEntity | lower }}_id = None):
         logger.debug("{{ entity.nameEntity }}Ressource, call get with id = {0}".format(id))
 
         if({{ entity.nameEntity | lower }}_id != None):
