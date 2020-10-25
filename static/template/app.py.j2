@@ -94,4 +94,4 @@ moduleSecurityChecker.addPath(security.Path('/{{ entity.nameEntity }}', policy=s
 
 @app.before_request
 def before_request():
-    moduleSecurityChecker(request)
+    moduleSecurityChecker.checkPath(request)

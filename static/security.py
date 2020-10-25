@@ -40,14 +40,14 @@ class ModuleSecurityChecker:
         if path not in self.__paths:
             self.__paths.append(path)
 
-    def checkPath(self, request: Request):
+    def checkPath(self, url: str, method: str):
         found = False
         policy = None
 
         for path in self.__paths:
             pattern = re.compile(path.getUrl())
-            if pattern.match(request.path) != None:
-                if request.method in path.getMethods() or path.getMethods() == [MethodsEnum.ALL]:
+            if pattern.match(url) != None:
+                if method in path.getMethods() or path.getMethods() == [MethodsEnum.ALL]:
                     found = True
                     policy = path.getPolicy()
                     break
