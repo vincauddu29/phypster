@@ -93,6 +93,9 @@ def init():
     # helpers Test
     shutil.copy(getPathFileInStatic("helpersTest.py"), "Tests/helpersTest.py")
 
+    # Security config
+    shutil.copy(getPathFileInStatic("security.py"), "securityConfig.py")
+
     createDirectory("Tests/Mocks")
 
     writeAppFile()

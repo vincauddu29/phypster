@@ -7,10 +7,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 import os
 import logging
+import securityConfig as security
 
 env = os.environ.get('WEBAPP_ENV', 'dev')
 
-# logging
+###########
+# logging #
+###########
 formatter = logging.Formatter("%(asctime)s -- %(name)s -- %(levelname)s -- %(message)s")
 
 handler_critic = logging.FileHandler("src/Logs/critic.log", mode="a", encoding="utf-8")
@@ -39,8 +42,6 @@ logger.addHandler(handler_info)
 logger.addHandler(handler_error)
 logger.addHandler(handler_debug)
 
-db = SQLAlchemy()
-
 def page_not_found(error):
     resp = jsonify({
         "msg" : "Not Found"
@@ -64,30 +65,33 @@ def createApp():
     app = Flask(__name__)
     app.config.from_object(config)
 
-    # db.init_app(app)
-    # migrate.init_app(app, db)
-    # jwt.init_app(app)
-    # ma.init_app(app)
-
     app.register_error_handler(404, page_not_found)
     app.register_error_handler(500, error_system)
     
     return app
 
+############
+# app init #
+############
+db = SQLAlchemy()
+moduleSecurityChecker = security.ModuleSecurityChecker()
 app = createApp()
-
 db.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
-# ma = Marshmallow(app)
 api = Api(app)
 
+#######################################
+# register routes and security policy #
+#######################################
 {%- for entity in entities %}
 from src.Ressources.{{ entity.nameEntity }}Ressource import {{ entity.nameEntity }}Ressource
 {%- endfor %}
-
-# register routes
 {% for entity in entities %}
-# {{ entity.nameEntity }}Ressource.register(app)
 api.add_resource({{ entity.nameEntity }}Ressource, '/{{ entity.nameEntity }}')
+moduleSecurityChecker.addPath(security.Path('/{{ entity.nameEntity }}', policy=security.SecurityPolicyEnum.JWT))
 {%- endfor %}
+
+@app.before_request
+def before_request():
+    moduleSecurityChecker(request)
