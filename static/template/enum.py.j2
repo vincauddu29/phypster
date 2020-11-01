@@ -1,0 +1,6 @@
+from enum import Enum
+
+class {{ entity.nameEnum }}Enum(Enum):
+    {%- for item in entity.listItems %}
+    {{ item.upper() }} = {{ loop.index }}
+    {%- endfor %}

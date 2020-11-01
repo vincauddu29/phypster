@@ -116,6 +116,12 @@ class {{ entity.nameEntity }}RepositoryTest(TestCase):
 
             assert res != None
             assert res.{{ entity.getPrimaryKey().nameColumn }} == entityWith.{{ entity.getPrimaryKey().nameColumn }}
+            {%- for column in entity.columns %}
+            assert res.{{ column.nameColumn }} == entityWith.{{ column.nameColumn }}
+            {%- endfor %}
+            {%- for enumColumn in entity.enums %}
+            assert res.{{ enumColumn.enum.nameEnum.lower() }} == entityWith.{{ enumColumn.enum.nameEnum }}
+            {%- endfor %}
 
     def test_remove_empty(self):
         logger.info("{{ entity.nameEntity }}RepositoryTest.test_remove_empty, call")

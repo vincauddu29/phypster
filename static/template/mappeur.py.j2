@@ -65,13 +65,17 @@ class {{ entity.nameEntity }}Mappeur:
         {% endfor %}
         dto = {{ entity.nameEntity }}DTO(entity.{{ entity.getPrimaryKey().nameColumn }}
         {%- if entity.columns | length > 0 %}
-            {%- for column in entity.columns[:-1] -%}
+            {%- for column in entity.columns -%}
             , entity.{{ column.nameColumn }}
             {%- endfor -%}
-            , entity.{{ entity.columns[-1].nameColumn }}
+        {%- endif -%}
+        {%- if entity.enums | length > 0 %}
+            {%- for enumColumn in entity.enums -%}
+            , entity.{{ enumColumn.enum.nameEnum.lower() }}
+            {%- endfor -%}
         {%- endif -%}
         {%- if entity.relationships | length > 0 %}
-        {% for relationship in entity.relationships -%}
+        {%- for relationship in entity.relationships -%}
             , {% if relationship.entity1 == entity %}RELATIONSHIPS['{{ relationship.entity2.nameEntity | lower }}']{% else %}RELATIONSHIPS['{{ relationship.entity1.nameEntity | lower }}']{% endif %}{% if loop.last %}){% endif %}
         {%- endfor %}
         {%- else %}
@@ -109,6 +113,14 @@ class {{ entity.nameEntity }}Mappeur:
         else:
             entity.{{ entity.columns[-1].nameColumn }} = None
         {% endif %}
+        {%- if entity.enums | length > 0 %}
+            {%- for enumColumn in entity.enums -%}
+        if '{{ enumColumn.enum.nameEnum.lower() }}' in dto_keys and dto['{{ enumColumn.enum.nameEnum.lower() }}'] != None:
+            entity.{{ enumColumn.enum.nameEnum.lower() }} = dto['{{ enumColumn.enum.nameEnum.lower() }}']
+        else:
+            entity.{{ enumColumn.enum.nameEnum.lower() }} = None
+            {%- endfor -%}
+        {%- endif -%}
         {%- for relationship in entity.relationships -%}
         {%- if relationship.isOneToOne %}
         {%- if relationship.entity1 == entity %}

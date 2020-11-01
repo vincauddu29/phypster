@@ -1,10 +1,12 @@
 class {{ entity.nameEntity }}DTO(dict):
     def __init__(self, {{ entity.getPrimaryKey().nameColumn }}
         {%- if entity.columns | length > 0 -%}
-            {%- for column in entity.columns[:-1] -%}
+            {%- for column in entity.columns -%}
                 , {{ column.nameColumn }}
             {%- endfor -%}
-            , {{ entity.columns[-1].nameColumn }}
+            {%- for enumColumn in entity.enums -%}
+                , {{ enumColumn.enum.nameEnum.lower() }}
+            {%- endfor -%}
             {%- if entity.relationships | length > 0 -%}
                 {%- for relationship in entity.relationships -%}
                     , {% if entity == relationship.entity1 %}{{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }}{% endif %}{% if loop.last %}):{% endif %}
@@ -17,10 +19,12 @@ class {{ entity.nameEntity }}DTO(dict):
         {%- endif %}
         dict.__init__(self, id = {{ entity.getPrimaryKey().nameColumn }}
             {%- if entity.columns | length > 0 -%}
-                {%- for column in entity.columns[:-1] -%}
+                {%- for column in entity.columns -%}
                     , {{ column.nameColumn }} = {{ column.nameColumn }}
                 {%- endfor -%}
-                , {{ entity.columns[-1].nameColumn }} = {{- entity.columns[-1].nameColumn }}
+                {%- for enumColumn in entity.enums -%}
+                    , {{ enumColumn.enum.nameEnum.lower() }} = {{ enumColumn.enum.nameEnum.lower() }}
+                {%- endfor -%}
                 {%- if entity.relationships | length > 0 -%}
                     {%- for relationship in entity.relationships -%}
                         , {% if entity == relationship.entity1 %}{{ relationship.entity2.nameEntity | lower }} = {{ relationship.entity2.nameEntity | lower }}{% else %}{{ relationship.entity1.nameEntity | lower }} = {{ relationship.entity1.nameEntity | lower }}{% endif %}{% if loop.last %}){% endif %}

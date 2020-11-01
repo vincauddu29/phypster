@@ -5,6 +5,9 @@ from src import db
 {% for relationship in entity.relationships -%}
     {% if relationship.isManyToMany %}from . import {{ relationship.associateTable.name }}{% endif %}
 {%- endfor %}
+{% for enumColumn in entity.enums -%}
+    from src.Enums.{{ enumColumn.enum.nameEnum }}Enum import {{ enumColumn.enum.nameEnum }}Enum
+{%- endfor %}
 
 class {{ entity.nameEntity }}Entity(db.Model):
     __tablename__ = '{{ entity.nameEntity | lower }}_{{ entity.subName }}'
@@ -12,6 +15,9 @@ class {{ entity.nameEntity }}Entity(db.Model):
     {% for column in entity.columns -%}
     {{ column.nameColumn }} = db.Column('{{ entity.subName }}_{{ column.nameColumn }}', db.{{ column.typeData }}, nullable = {{ column.nullable }})
     {% endfor -%}
+    {%- for enumColumn in entity.enums %}
+    {{ enumColumn.enum.nameEnum.lower() }} = db.Column('{{ entity.subName }}_{{ enumColumn.enum.nameEnum.lower() }}', db.Enum({{ enumColumn.enum.nameEnum }}Enum), nullable = {{ enumColumn.nullable }})
+    {% endfor %}
 
     {%- for relationship in entity.relationships -%}
     {%- if relationship.isOneToOne %}
@@ -54,6 +60,9 @@ class {{ entity.nameEntity }}Entity(db.Model):
         {% for column in entity.columns -%}
         self.{{ column.nameColumn }} = None
         {% endfor -%}
+        {%- for enumColumn in entity.enums %}
+        {{ enumColumn.enum.nameEnum.lower() }} = None
+        {% endfor %}
         {%- for relationship in entity.relationships -%}
         {%- if relationship.isOneToOne %}
         {%- if relationship.entity1 == entity %}

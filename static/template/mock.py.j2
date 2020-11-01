@@ -3,12 +3,14 @@ import random
 from faker import Faker
 from src import app, db
 from typing import List
+{% for enumColumn in entity.enums %}
+from src.Enums.{{ enumColumn.enum.nameEnum }}Enum import {{ enumColumn.enum.nameEnum }}Enum
+{% endfor %}
 
 class {{ entity.nameEntity }}Mock:
     fake = Faker()
     fake.seed({{ entity.getRandomInt() }})
     {%- for step_var in ['DEFAULT', 'UPDATE'] %}
-    # {{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_{{ step_var }} = random.randint(1, 2000)
     {% for column in entity.columns %}
     {{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_{{ step_var }} =
     {%- if column.typeData == 'String' -%}
@@ -26,6 +28,10 @@ class {{ entity.nameEntity }}Mock:
     {%- endif %}
     {%- endfor %}
     {%- endfor %}
+    {% for enumColumn in entity.enums %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[0] }}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_UPDATE = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[1] }}
+    {% endfor %}
 
     def createEntityWithoutRelationship(self, id = None) -> {{ entity.nameEntity }}Entity:
         {{ entity.nameEntity | lower }}Entity = {{ entity.nameEntity }}Entity()
@@ -36,6 +42,9 @@ class {{ entity.nameEntity }}Mock:
         {%- for column in entity.columns %}
         {{ entity.nameEntity | lower }}Entity.{{ column.nameColumn }} = self.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
         {%- endfor %}
+        {% for enumColumn in entity.enums %}
+        {{ entity.nameEntity | lower }}Entity.{{ enumColumn.enum.nameEnum.lower() }} = self.{{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT
+        {% endfor %}
         return {{ entity.nameEntity | lower }}Entity
 
     def createEntityWithRelationship(self, id = None
@@ -71,34 +80,26 @@ class {{ entity.nameEntity }}Mock:
         {%- if relationship.isOneToOne %}
             {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- elif relationship.isManyToOne %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {% else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- elif relationship.isOneToMany %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- else %}
                 {%- if relationship.entity1 == entity %}
         from .{{ relationship.entity2.nameEntity }}Mock import {{ relationship.entity2.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity2.nameEntity }}Repository import {{ relationship.entity2.nameEntity }}Repository
                 {%- else %}
         from .{{ relationship.entity1.nameEntity }}Mock import {{ relationship.entity1.nameEntity }}Mock
-        from src.Repositories.{{ relationship.entity1.nameEntity }}Repository import {{ relationship.entity1.nameEntity }}Repository
                 {%- endif %}
             {%- endif %}
         {%- endfor %}

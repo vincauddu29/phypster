@@ -27,12 +27,24 @@ class RelationShip:
         self.isManyToMany = isManyToMany
         self.associateTable = associateTable
 
-# class ForeignKey:
-#     def __init__(self, foreignKeyColumn, entity, typeData: str, nullable: bool = False):
-#         self.entity = entity
-#         self.foreignKeyColumn = foreignKeyColumn
-#         self.nullable = nullable
-#         self.typeData = typeData
+class AssociateTable:
+    def __init__(self, entity1, entity2):
+        self.name = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
+        self.entity1 = entity1
+        self.entity2 = entity2
+
+class EnumEntity:
+    def __init__(self, name: str) -> None:
+        self.nameEnum = name
+        self.listItems = []
+
+    def addItem(self, item: str):
+        self.listItems.append(item)
+
+class EnumColumn:
+    def __init__(self, enum: EnumEntity, nullable: bool) -> None:
+        self.enum: EnumEntity = enum
+        self.nullable = nullable
 
 class Entity:
     def __init__(self, name: str):
@@ -41,7 +53,7 @@ class Entity:
         self.subName = name[0:3].lower()
         self.columns = []
         self.relationships = []
-        # self.foreignkeys = []
+        self.enums = []
 
     def addColumn(self, nameColumn: str, typeData: str, primary: bool = False, nullable: bool = False):
         if primary:
@@ -49,11 +61,11 @@ class Entity:
         else:
             self.columns.append(Column(nameColumn, typeData, False, nullable=nullable))
         
-    def addRelationShip(self, relationship):
+    def addRelationShip(self, relationship: RelationShip):
         self.relationships.append(relationship)
 
-    # def addForeignKey(self, entity, foreignKeyColumn, typeData: str = "Integer", nullable: bool = False):
-    #     self.foreignkeys.append(ForeignKey(foreignKeyColumn, entity, typeData, nullable))
+    def addEnum(self, myEnum: EnumEntity, nullable: bool = False):
+        self.enums.append(EnumColumn(myEnum, nullable))
 
     def getPrimaryKey(self):
         if self.primaryKey == None:
@@ -68,9 +80,3 @@ class Entity:
         for r in self.relationships:
             if r.isManyToOne or r.isOneToMany:
                 return True
-
-class AssociateTable:
-    def __init__(self, entity1, entity2):
-        self.name = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
-        self.entity1 = entity1
-        self.entity2 = entity2

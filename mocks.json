@@ -1,4 +1,13 @@
 {
+    "enums": [
+        {
+            "name": "Genre",
+            "listItems": [
+                "Homme",
+                "Femme"
+            ]
+        }
+    ],
     "entities": [
         {
             "name": "Parent",
@@ -7,7 +16,13 @@
                 ["col1", "Float", false, false],
                 ["col2", "DateTime", false, false]
             ],
-            "relationships": []
+            "relationships": [],
+            "enums": [
+                {
+                    "name": "Genre",
+                    "nullable": true
+                }
+            ]
         },
         {
             "name": "Child",
@@ -20,7 +35,8 @@
                     "entity2": "Parent",
                     "typeRelation": "One to Many"
                 }
-            ]
+            ],
+            "enums": []
         },
         {
             "name": "Adress",
@@ -32,7 +48,8 @@
                     "entity2": "Parent",
                     "typeRelation": "One to One"
                 }
-            ]
+            ],
+            "enums": []
         },
         {
             "name": "Job",
@@ -44,7 +61,8 @@
                     "entity2": "Parent",
                     "typeRelation": "Many to Many"
                 }
-            ]
+            ],
+            "enums": []
         },
         {
             "name": "Present",
@@ -56,7 +74,8 @@
                     "entity2": "Child",
                     "typeRelation": "Many to One"
                 }
-            ]
+            ],
+            "enums": []
         }
     ]
 }

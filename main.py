@@ -8,6 +8,7 @@ from Entity import *
 DEBUG = False
 ENTITIES = dict()
 ASSOCIATETABLES = []
+ENUMS = dict()
 
 def log(message: str, type_message = "DEBUG"):
     if type_message == "INFO":
@@ -72,7 +73,8 @@ def init():
         "Ressources": True,
         "Logs": False,
         "Parsers": False,
-        "docker": False
+        "docker": False,
+        "Enums": False
     }
 
     for directory_name in list_directories_name:
@@ -113,7 +115,7 @@ def createEntity(data = None):
     cond_stop = False
 
     if data == None:
-        data = {"columns": [], "relationships": []}
+        data = {"columns": [], "relationships": [], "enums": []}
         clear()
         name_question = [inquirer.Text('name', message="What's the entity name")]
         name_answer = inquirer.prompt(name_question)
@@ -131,14 +133,30 @@ def createEntity(data = None):
             elif step_answer['choose'] == 'Column':
                 questions = [
                     inquirer.Text('name', message="What's the column name"),
-                    inquirer.List('typeData', message="What is the data type", choices=['Integer', 'String', 'Float', 'DateTime', 'Boolean']),
-                    inquirer.Checkbox('attr', message="Choose attributes", choices=['Primary Key', 'Nullable'])
+                    inquirer.List('typeData', message="What is the data type", choices=['Integer', 'String', 'Float', 'DateTime', 'Boolean', 'Enum']),
                 ]
                 clear()
                 answers = inquirer.prompt(questions)
-                nullable = True if 'Nullable' in answers['attr'] else False
-                primaryKey = True if 'Primary Key' in answers['attr'] else False
-                data["columns"].append([answers["name"], answers["typeData"], primaryKey, nullable])
+                if answers["typeData"] == "enum":
+                    enums_name = list(ENUMS.keys())
+                    enum_question = [inquirer.List('enum', message="What's the enum", choices=enums_name)]
+                    clear()
+                    enum_answer = inquirer.prompt(enum_question)
+
+                attribute_question = [
+                    inquirer.Checkbox('attr', message="Choose attributes", choices=['Primary Key', 'Nullable'])
+                ]
+                clear()
+                attribute_answer = inquirer.prompt(attribute_question)
+                nullable = True if 'Nullable' in attribute_answer['attr'] else False
+                primaryKey = True if 'Primary Key' in attribute_answer['attr'] else False
+
+                if answers["typeData"] != "enum":
+                    data["columns"].append([attribute_answer["name"], attribute_answer["typeData"], primaryKey, nullable])
+                else:
+                    enums_name = list(ENUMS.keys())
+                    data["enums"].append({"name" : enum_answer["enum"], "nullable": nullable, "primaryKey": primaryKey})
+
             else:
                 entities_name = list(ENTITIES.keys())
                 entities_name.append('Back')
@@ -181,7 +199,40 @@ def createEntity(data = None):
         entity2.addRelationShip(relationship)
         ENTITIES[entity2.nameEntity] = entity2
 
+    for data_enum in data["enums"]:
+        entity.addEnum(ENUMS[data_enum["name"]], data_enum["nullable"])
+
     ENTITIES[data['name']] = entity
+
+def createEnum(data = None):
+    if data == None:
+        data = {"listItems": []}
+        cond_stop = False
+        clear()
+        name_question = [inquirer.Text('name', message="What's the entity name")]
+        name_answer = inquirer.prompt(name_question)
+        data["name"] = name_answer["name"]
+        
+
+        choose_step = [inquirer.List('choose', message="What now", choices=['Add item into the enum', 'Stop'])]
+
+        while not cond_stop:
+            clear()
+            step_answer = inquirer.prompt(choose_step)
+
+            if step_answer['choose'] == 'Stop':
+                    cond_stop = True
+            elif step_answer['choose'] == 'Add item into the enum':
+                questions = [inquirer.Text('name', message="What's the item name")]
+                clear()
+                answers = inquirer.prompt(questions)
+                data.listItems.append(answers["name"])
+
+    enum = EnumEntity(data["name"])
+    for item in data["listItems"]:
+        enum.addItem(item)
+
+    ENUMS[enum.nameEnum] = enum
 
 def writeFile(path_template, path_output, entity):
     # Open template
@@ -238,6 +289,10 @@ def generateRessourcesFiles(entity):
     writeFile("template/ressource.py.j2", "src/Ressources/{0}Ressource.py".format(entity.nameEntity), entity)
     info("[x] {0}Ressource file created".format(entity.nameEntity))
 
+def generateEnumsFiles(entity):
+    writeFile("template/enum.py.j2", "src/Enums/{0}Enum.py".format(entity.nameEnum), entity)
+    info("[x] {0}Enum file created".format(entity.nameEnum))
+
 # TESTS
 def generateEntitiesTestsFiles(entity):
     writeFile("template/entityTest.py.j2", "Tests/Models/test_{0}EntityTest.py".format(entity.nameEntity), entity)
@@ -290,17 +345,22 @@ def generateFiles():
     for associateTable in ASSOCIATETABLES:
         generateAssociatedTableFiles(associateTable)
 
+    for enum in ENUMS.values():
+        generateEnumsFiles(enum)
+
     writeAppFile()
 
 if __name__ == "__main__":
     cond_stop = False
-    choose_step = [inquirer.List('choose', message="What now", choices=['Create entity', 'Stop'])]
+    choose_step = [inquirer.List('choose', message="What now", choices=['Create entity', 'Create enum', 'Stop'])]
 
     while not cond_stop:
         step_answer = inquirer.prompt(choose_step)
 
         if step_answer['choose'] == 'Create entity':
             createEntity()
+        elif step_answer['choose'] == 'Create enum':
+            createEnum()
         else:
             cond_stop = True
     init()
