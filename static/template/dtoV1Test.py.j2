@@ -1,6 +1,9 @@
 from unittest import TestCase
 from faker import Faker
 from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
+{%- for enumColumn in entity.enums %}
+from src.Enums.{{ enumColumn.enum.nameEnum }}Enum import {{ enumColumn.enum.nameEnum }}Enum
+{%- endfor %}
 
 def create_list(nb: int):
     fake = Faker()
@@ -60,13 +63,20 @@ class {{ entity.nameEntity }}EntityTest(TestCase):
     {%- endif %}
     {%- endfor %}
     {%- endfor %}
+    {%- for enumColumn in entity.enums %}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[0] | upper }}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_UPDATE = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[1] | upper }}
+    {%- endfor %}
 
     def test_createDTO(self):
         dto = {{ entity.nameEntity }}DTO(self.{{ entity.nameEntity | upper }}_ENTITY_{{ entity.getPrimaryKey().nameColumn | upper }}_DEFAULT
         {%- for column in entity.columns -%}
         , self.{{ entity.nameEntity | upper }}_ENTITY_{{ column.nameColumn | upper }}_DEFAULT
         {%- endfor %}
-        {% if entity.relationships | length > 0 %}
+        {%- for enumColumn in entity.enums %}
+        , self.{{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT
+        {%- endfor %}
+        {%- if entity.relationships | length > 0 %}
         {%- for relationship in entity.relationships -%}
         {%- if relationship.isOneToOne %}
         {%- if relationship.entity1 == entity -%}

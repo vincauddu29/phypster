@@ -3,9 +3,9 @@ import random
 from faker import Faker
 from src import app, db
 from typing import List
-{% for enumColumn in entity.enums %}
+{%- for enumColumn in entity.enums %}
 from src.Enums.{{ enumColumn.enum.nameEnum }}Enum import {{ enumColumn.enum.nameEnum }}Enum
-{% endfor %}
+{%- endfor %}
 
 class {{ entity.nameEntity }}Mock:
     fake = Faker()
@@ -29,8 +29,8 @@ class {{ entity.nameEntity }}Mock:
     {%- endfor %}
     {%- endfor %}
     {% for enumColumn in entity.enums %}
-    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[0] }}
-    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_UPDATE = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[1] }}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_DEFAULT = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[0] | upper }}
+    {{ entity.nameEntity | upper }}_ENTITY_{{ enumColumn.enum.nameEnum | upper }}_UPDATE = {{ enumColumn.enum.nameEnum }}Enum.{{ enumColumn.enum.listItems[1] | upper }}
     {% endfor %}
 
     def createEntityWithoutRelationship(self, id = None) -> {{ entity.nameEntity }}Entity:

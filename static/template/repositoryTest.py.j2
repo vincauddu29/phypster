@@ -120,7 +120,7 @@ class {{ entity.nameEntity }}RepositoryTest(TestCase):
             assert res.{{ column.nameColumn }} == entityWith.{{ column.nameColumn }}
             {%- endfor %}
             {%- for enumColumn in entity.enums %}
-            assert res.{{ enumColumn.enum.nameEnum.lower() }} == entityWith.{{ enumColumn.enum.nameEnum }}
+            assert res.{{ enumColumn.enum.nameEnum.lower() }} == entityWith.{{ enumColumn.enum.nameEnum.lower() }}
             {%- endfor %}
 
     def test_remove_empty(self):
