@@ -78,7 +78,8 @@ class Phypster:
             "Logs": False,
             "Parsers": False,
             "docker": False,
-            "Enums": False
+            "Enums": False,
+            "Config": False,
         }
 
         for directory_name in list_directories_name:
@@ -88,7 +89,6 @@ class Phypster:
         open("src/Logs/debug.log", "w").close()
         open("src/Logs/info.log", "w").close()
         open("src/Logs/error.log", "w").close()
-        open("src/Logs/critic.log", "w").close()
 
         # test directories
         self.createDirectory("Tests")
@@ -100,13 +100,16 @@ class Phypster:
         shutil.copy(self.getPathFileInStatic("helpersTest.py"), "Tests/helpersTest.py")
 
         # Security config
-        shutil.copy(self.getPathFileInStatic("security.py"), "securityConfig.py")
+        shutil.copy(self.getPathFileInStatic("security.py"), "src/Config/SecurityConfig.py")
+
+        # Logger
+        shutil.copy(self.getPathFileInStatic("logger.py"), "src/Config/Logger.py")
 
         self.createDirectory("Tests/Mocks")
 
         self.writeAppFile()
 
-        shutil.copy(self.getPathFileInStatic("config.py"), "src/config.py")
+        shutil.copy(self.getPathFileInStatic("config.py"), "src/Config/ApplicationConfig.py")
         self.info("[x] create config.py")
         # shutil.copy(getPathFileInStatic("__init__.py"), "src/__init__.py")
         # info("[x] create __init__.py")
@@ -252,7 +255,7 @@ class Phypster:
         # Open template
         with open(self.getPathFileInStatic("template/app.py.j2")) as f:
             template = Template(f.read())
-        data = template.render(entities=list(ENTITIES.values()))
+        data = template.render(entities=list(self.ENTITIES.values()))
 
         # Write file into the directory
         # with open("src/app.py", "w") as f:
@@ -327,8 +330,8 @@ class Phypster:
         self.info("[x] {0}Mock file created".format(entity.nameEntity))
 
     def generateFiles(self):
-        for name in ENTITIES.keys():
-            entity = ENTITIES[name]
+        for name in self.ENTITIES.keys():
+            entity = self.ENTITIES[name]
             self.generateEntitiesFiles(entity)
             self.generateRepositoriesFiles(entity)
             self.generateDTOsFiles(entity)
