@@ -1,9 +1,12 @@
+from typing import List
+
+
 class Column:
     def __init__(self, name: str, typeData: str, primary: bool, nullable: bool = False):
-        self.nameColumn = name
-        self.typeData = typeData
-        self.primary = primary
-        self.nullable = nullable
+        self.nameColumn: str = name
+        self.typeData: str = typeData
+        self.primary: bool = primary
+        self.nullable: bool = nullable
 
     def typeDataPython(self):
         if self.typeData == 'Integer':
@@ -19,24 +22,24 @@ class Column:
 
 class RelationShip:
     def __init__(self, entity1, entity2, isOneToOne: bool = False, isOneToMany: bool = False, isManyToOne: bool = False, isManyToMany: bool = False, associateTable = None):
-        self.entity1 = entity1
-        self.entity2 = entity2
-        self.isOneToOne = isOneToOne
-        self.isOneToMany = isOneToMany
-        self.isManyToOne = isManyToOne
-        self.isManyToMany = isManyToMany
-        self.associateTable = associateTable
+        self.entity1: Entity = entity1
+        self.entity2: Entity = entity2
+        self.isOneToOne: bool = isOneToOne
+        self.isOneToMany: bool = isOneToMany
+        self.isManyToOne: bool = isManyToOne
+        self.isManyToMany: bool = isManyToMany
+        self.associateTable: AssociateTable = associateTable
 
 class AssociateTable:
     def __init__(self, entity1, entity2):
-        self.name = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
-        self.entity1 = entity1
-        self.entity2 = entity2
+        self.name: str = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
+        self.entity1: Entity = entity1
+        self.entity2: Entity = entity2
 
 class EnumEntity:
     def __init__(self, name: str) -> None:
-        self.nameEnum = name
-        self.listItems = []
+        self.nameEnum: str = name
+        self.listItems: List[str] = []
 
     def addItem(self, item: str):
         self.listItems.append(item)
@@ -44,16 +47,16 @@ class EnumEntity:
 class EnumColumn:
     def __init__(self, enum: EnumEntity, nullable: bool) -> None:
         self.enum: EnumEntity = enum
-        self.nullable = nullable
+        self.nullable: bool = nullable
 
 class Entity:
     def __init__(self, name: str):
-        self.nameEntity = name
-        self.primaryKey = None
-        self.subName = name[0:3].lower()
-        self.columns = []
-        self.relationships = []
-        self.enums = []
+        self.nameEntity: str = name
+        self.primaryKey: bool = None
+        self.subName: str = name[0:3].lower()
+        self.columns: List[Column] = []
+        self.relationships: List[RelationShip] = []
+        self.enums: List[EnumColumn] = []
 
     def addColumn(self, nameColumn: str, typeData: str, primary: bool = False, nullable: bool = False):
         if primary:
@@ -76,7 +79,7 @@ class Entity:
         import random
         return random.randint(1, 2000)
 
-    def haveOneToManyOrManyToOne(self):
+    def haveOneToManyOrManyToOne(self) -> bool:
         for r in self.relationships:
             if r.isManyToOne or r.isOneToMany:
                 return True
