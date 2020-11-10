@@ -1,22 +1,18 @@
-import json
+import json, os, shutil
 from phypster import Phypster
 from unittest import TestCase
 
 class PhypsterTest(TestCase):
-        # with open("mocks.json", "r") as f:
-        #     data_json = json.load(f)
-
-        # for data_enum in data_json["enums"]:
-        #     createEnum(data_enum)
-
-        # for data_entity in data_json["entities"]:
-        #     createEntity(data_entity)
-
-        # init()
-        # generateFiles()
-
     def setUp(self):
         self.phypster = Phypster()
+        list_paths = ["src", "Tests", "migrations"]
+        for path in list_paths:
+            if os.path.exists(path):
+                shutil.rmtree(path)
+
+        if os.path.exists("server.py"):
+            os.remove("server.py")
+
 
     def test_init(self):
         assert len(self.phypster.ASSOCIATETABLES) == 0
@@ -387,3 +383,35 @@ class PhypsterTest(TestCase):
         enum = self.phypster.ENTITIES['Entity1'].enums[0]
         assert enum.nullable == False
         assert enum.enum.nameEnum == "TypeData"
+
+    def test_init(self):
+        self.phypster.init()
+
+        assert os.path.exists("src") == True
+        assert os.path.exists("src/Config") == True
+        assert os.path.exists("src/Config/SecurityConfig.py") == True
+        assert os.path.exists("src/Config/Logger.py") == True
+        assert os.path.exists("src/Config/ApplicationConfig.py") == True
+        assert os.path.exists("src/Models") == True
+        assert os.path.exists("src/DTOs") == True
+        assert os.path.exists("src/Repositories") == True
+        assert os.path.exists("src/Services") == True
+        assert os.path.exists("src/Mappeurs") == True
+        assert os.path.exists("src/Ressources") == True
+        assert os.path.exists("src/Logs") == True
+        assert os.path.exists("src/Logs/debug.log") == True
+        assert os.path.exists("src/Logs/info.log") == True
+        assert os.path.exists("src/Logs/error.log") == True
+        assert os.path.exists("src/Parsers") == True
+        assert os.path.exists("src/docker") == True
+        assert os.path.exists("src/docker/docker-compose.test.yml") == True
+        assert os.path.exists("src/Enums") == True
+        assert os.path.exists("Tests") == True
+        assert os.path.exists("Tests/helpersTest.py") == True
+        assert os.path.exists("Tests/Models") == True
+        assert os.path.exists("Tests/DTOs") == True
+        assert os.path.exists("Tests/Repositories") == True
+        assert os.path.exists("Tests/Services") == True
+        assert os.path.exists("Tests/Mappeurs") == True
+        assert os.path.exists("Tests/Ressources") == True
+        assert os.path.exists("server.py") == True
