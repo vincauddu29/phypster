@@ -1,19 +1,20 @@
 from flask import jsonify, abort, request
 from flask_restful import Resource
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from src import logger
 from src.Services.{{ entity.nameEntity }}Service import {{ entity.nameEntity }}Service
 from src.DTOs.{{ entity.nameEntity }}DTO import {{ entity.nameEntity }}DTO
 from src.Parsers.{{ entity.nameEntity }}Parser import {{ entity.nameEntity }}Parser
 from typing import List
+from src.Config.Logger import Logger
 
 class {{ entity.nameEntity }}Ressource(Resource):
 
     {{ entity.nameEntity | lower }}Service = {{ entity.nameEntity }}Service()
     {{ entity.nameEntity | lower }}Parser = {{ entity.nameEntity }}Parser()
+    log = Logger({{ entity.nameEntity }}Ressource)
 
     def get(self, {{ entity.nameEntity | lower }}_id = None):
-        logger.debug("{{ entity.nameEntity }}Ressource, call get with id = {0}".format(id))
+        self.log.debug("get", "call")
 
         if({{ entity.nameEntity | lower }}_id != None):
             res = self.{{ entity.nameEntity | lower }}Service.get({{ entity.nameEntity | lower }}_id)
@@ -26,7 +27,7 @@ class {{ entity.nameEntity }}Ressource(Resource):
             abort(404)
 
     def post(self):
-        logger.debug("{{ entity.nameEntity }}Ressource, call post, json = {0}".format(request.get_json()))
+        self.log.debug("post", "call, json = {0}".format(request.get_json()))
         args = None
         dto = None
         try:
@@ -47,18 +48,18 @@ class {{ entity.nameEntity }}Ressource(Resource):
             return None, 500
 
     def put(self, {{ entity.nameEntity | lower }}_id):
-        logger.debug("{{ entity.nameEntity }}Ressource, call put, id = {0} json = {1}".format({{ entity.nameEntity | lower }}_id, request.get_json()))
+        self.log.debug("put", "call, id = {0}, json = {1}".format({{ entity.nameEntity | lower }}_id, request.get_json()))
         args = None
         dto = None
         try:
             args = self.{{ entity.nameEntity | lower }}Parser.getReqparse().parse_args()
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Ressource, put error parsing args, error = {0}".format(e))
+            self.log.error("put", "error parsing args, error = {0}".format(e))
             abort(500)
         try:
             dto = self.{{ entity.nameEntity | lower }}Parser.toDTO(args)
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Ressource, put error toDTO, error = {0}".format(e))
+            self.log.error("put", "error toDTO, error = {0}".format(e))
             abort(500)
 
         dto = self.{{ entity.nameEntity | lower }}Service.update({{ entity.nameEntity | lower }}_id, dto)
@@ -68,7 +69,7 @@ class {{ entity.nameEntity }}Ressource(Resource):
             return None, 500
 
     def delete(self, {{ entity.nameEntity | lower }}_id):
-        logger.debug("{{ entity.nameEntity }}Ressource, call delete with id = {0}".format(id))
+        self.log.debug("delete", "call id = {0}".format({{ entity.nameEntity | lower }}_id))
 
         dto = self.{{ entity.nameEntity | lower }}Service.remove({{ entity.nameEntity | lower }}_id)
         if dto != None:

@@ -1,10 +1,13 @@
-from src import db, logger
+from src import db
 from src.Models.{{ entity.nameEntity }}Entity import {{ entity.nameEntity }}Entity
 from typing import List
+from src.Config.Logger import Logger
 
 class {{ entity.nameEntity }}Repository:
+    log = Logger({{ entity.nameEntity }}Repository)
+
     def save(self, entity: {{ entity.nameEntity }}Entity) -> {{ entity.nameEntity }}Entity:
-        logger.debug("{{ entity.nameEntity }}Repository.save call")
+        self.log.debug("save", "call")
         try:
             db.session.add(entity)
             db.session.flush()
@@ -12,26 +15,26 @@ class {{ entity.nameEntity }}Repository:
             db.session.commit()
             return self.getById(id)
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Repository.save, {0}".format(e))
+            self.log.error("save", e)
 
     def getById(self, id: int) -> {{ entity.nameEntity }}Entity:
-        logger.debug("{{ entity.nameEntity }}Repository.getById call")
+        self.log.debug("getById", "call")
         try:
             return db.session.query({{ entity.nameEntity }}Entity).filter_by({{ entity.getPrimaryKey().nameColumn }} = id).first()
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Repository.getById, {0}".format(e))
+            self.log.error("getById", e)
             return None
 
     def get(self) -> List[{{ entity.nameEntity }}Entity]:
-        logger.debug("{{ entity.nameEntity }}Repository.get call")
+        self.log.debug("get", "call")
         try:
             return db.session.query({{ entity.nameEntity }}Entity).all()
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Repository.get, {0}".format(e))
+            self.log.error("get", e)
             return list()
 
     def remove(self, entity: {{ entity.nameEntity }}Entity) -> bool:
-        logger.debug("{{ entity.nameEntity }}Repository.remove call")
+        self.log.debug("remove", "call")
         try:
             if self.getById(entity.{{ entity.getPrimaryKey().nameColumn }}) != None:
                 db.session.delete(entity)
@@ -40,5 +43,5 @@ class {{ entity.nameEntity }}Repository:
             else:
                 return False
         except Exception as e:
-            logger.error("{{ entity.nameEntity }}Repository.remove, {0}".format(e))
+            self.log.error("remove", e)
             return False
