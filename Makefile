@@ -16,3 +16,14 @@ test: generate
 
 run:
 	@export FLASK_APP="server.py"; flask run
+
+uninstall:
+	pip3 uninstall phypster -y
+	rm -rf dist/
+	rm -rf build/
+
+build:
+	python3 setup.py sdist bdist_wheel
+
+install: build
+	pip3 install .
