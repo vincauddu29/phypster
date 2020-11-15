@@ -25,5 +25,5 @@ uninstall:
 build:
 	python3 setup.py sdist bdist_wheel
 
-install: build
+install: build uninstall
 	pip3 install .
