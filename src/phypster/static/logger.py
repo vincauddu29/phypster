@@ -1,10 +1,12 @@
-import logging, os
+import logging
+import os
+
 
 class Logger:
     def __init__(self, nameClass: str):
         env = os.environ.get('WEBAPP_ENV', 'dev')
 
-        formatter = logging.Formatter("%(asctime)s -- %(name)s -- %(levelname)s -- {name}.%(message)s".format(nameClass))
+        formatter = logging.Formatter("%(asctime)s -- %(name)s -- %(levelname)s -- {name}.%(message)s".format(name=nameClass))
 
         handler_info = logging.FileHandler("src/Logs/info.log", mode="a", encoding="utf-8")
         handler_error = logging.FileHandler("src/Logs/error.log", mode="a", encoding="utf-8")
@@ -30,7 +32,7 @@ class Logger:
         logger.addHandler(handler_debug)
 
     def __formatMessage(self, nameMethod: str, message: str):
-        return "{method} : {message}".format(method = nameMethod, message = message)
+        return "{method} : {message}".format(method=nameMethod, message=message)
 
     def debug(self, nameMethod: str, message: str):
         self.logger.debug(self.__formatMessage(nameMethod, message))

@@ -1,6 +1,7 @@
 class Config(object):
     pass
 
+
 class ProdConfig(Config):
     DEBUG = False
     SECRET_KEY = ""

@@ -1,8 +1,8 @@
-import argparse, json, inquirer
+import argparse
+import json
+import inquirer
 from .phypster import Phypster
 
-
-import setuptools as _
 
 def main():
     #############
@@ -19,7 +19,7 @@ def main():
 
     print("DEBUG = {0}".format(phypster.DEBUG))
 
-    if args.import_json != None:
+    if args.import_json is not None:
         with open("mocks.json", "r") as f:
             data_json = json.load(f)
 
@@ -44,6 +44,7 @@ def main():
 
     phypster.init()
     phypster.generateFiles()
+
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from flask_sqlalchemy import SQLAlchemy
 import logging
 import os

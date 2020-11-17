@@ -1,11 +1,13 @@
 #!/usr/bin/python3
-import os, inquirer, shutil
+import os
+import inquirer
+import shutil
 from typing import Dict, List
 from distutils.sysconfig import get_python_lib
 from jinja2 import Template
 import setuptools as _
+from .Entity import AssociateTable, EnumEntity, Entity, RelationShip
 
-from .Entity import *
 
 class Phypster:
     def __init__(self):
@@ -14,7 +16,7 @@ class Phypster:
         self.ENTITIES: Dict[str, Entity] = dict()
         self.ENUMS: Dict[str, EnumEntity] = dict()
 
-    def log(self, message: str, type_message = "DEBUG"):
+    def log(self, message: str, type_message="DEBUG"):
         if type_message == "INFO":
             print(message)
         elif type_message == "ERROR":
@@ -23,15 +25,14 @@ class Phypster:
             if self.DEBUG:
                 print(message)
 
-    # define our clear function 
+    # define our clear function
     def clear(self, ):
-        # for windows 
-        if os.name == 'nt': 
-            _ = os.system('cls') 
-    
-        # for mac and linux(here, os.name is 'posix') 
-        else: 
-            _ = os.system('clear') 
+        # for windows
+        if os.name == 'nt':
+            _ = os.system('cls')
+        # for mac and linux(here, os.name is 'posix')
+        else:
+            _ = os.system('clear')
 
     def info(self, message: str):
         self.log(message, "INFO")
@@ -99,39 +100,59 @@ class Phypster:
                 self.createDirectory("Tests/" + directory_name)
 
         # helpers Test
-        shutil.copy(self.getPathFileInStatic("helpersTest.py"), "Tests/helpersTest.py")
+        path = self.getPathFileInStatic("helpersTest.py")
+        shutil.copy(path, "Tests/helpersTest.py")
 
         # Security config
-        shutil.copy(self.getPathFileInStatic("security.py"), "src/Config/SecurityConfig.py")
+        path = self.getPathFileInStatic("security.py")
+        shutil.copy(path, "src/Config/SecurityConfig.py")
 
         # Logger
-        shutil.copy(self.getPathFileInStatic("logger.py"), "src/Config/Logger.py")
+        path = self.getPathFileInStatic("logger.py")
+        shutil.copy(path, "src/Config/Logger.py")
 
         self.createDirectory("Tests/Mocks")
 
         self.writeAppFile()
 
-        shutil.copy(self.getPathFileInStatic("config.py"), "src/Config/ApplicationConfig.py")
+        path = self.getPathFileInStatic("config.py")
+        shutil.copy(path, "src/Config/ApplicationConfig.py")
         self.info("[x] create config.py")
         # shutil.copy(getPathFileInStatic("__init__.py"), "src/__init__.py")
         # info("[x] create __init__.py")
-        shutil.copy(self.getPathFileInStatic("server.py"), "server.py")
+        path = self.getPathFileInStatic("server.py")
+        shutil.copy(path, "server.py")
         self.info("[x] create server.py")
-        shutil.copy(self.getPathFileInStatic("docker-compose.test.yml"), "src/docker/docker-compose.test.yml")
+        path = self.getPathFileInStatic("docker-compose.test.yml")
+        shutil.copy(path, "src/docker/docker-compose.test.yml")
         self.info("[x] create docker-compose.test.yml")
 
-    def createEntity(self, data = None):
+    def createEntity(self, data=None):
         cond_stop = False
 
-        if data == None:
+        if data is None:
             data = {"columns": [], "relationships": [], "enums": []}
             self.clear()
-            name_question = [inquirer.Text('name', message="What's the entity name")]
+            name_question = [
+                inquirer.Text(
+                    'name',
+                    message="What's the entity name"
+                    )]
             name_answer = inquirer.prompt(name_question)
 
             data["name"] = name_answer['name']
 
-            choose_step = [inquirer.List('choose', message="What now", choices=['Column', 'RelationShip', 'Stop'])]
+            choose_step = [
+                inquirer.List(
+                    'choose',
+                    message="What now",
+                    choices=[
+                        'Column',
+                        'RelationShip',
+                        'Stop'
+                    ]
+                )
+            ]
 
             while not cond_stop:
                 self.clear()
@@ -141,19 +162,42 @@ class Phypster:
                     cond_stop = True
                 elif step_answer['choose'] == 'Column':
                     questions = [
-                        inquirer.Text('name', message="What's the column name"),
-                        inquirer.List('typeData', message="What is the data type", choices=['Integer', 'String', 'Float', 'DateTime', 'Boolean', 'Enum']),
+                        inquirer.Text(
+                            'name',
+                            message="What's the column name"
+                        ),
+                        inquirer.List(
+                            'typeData',
+                            message="What is the data type",
+                            choices=[
+                                'Integer',
+                                'String',
+                                'Float',
+                                'DateTime',
+                                'Boolean',
+                                'Enum'
+                            ]),
                     ]
                     self.clear()
                     answers = inquirer.prompt(questions)
                     if answers["typeData"] == "enum":
                         enums_name = list(self.ENUMS.keys())
-                        enum_question = [inquirer.List('enum', message="What's the enum", choices=enums_name)]
+                        enum_question = [
+                            inquirer.List(
+                                'enum',
+                                message="What's the enum",
+                                choices=enums_name
+                            )
+                        ]
                         self.clear()
                         enum_answer = inquirer.prompt(enum_question)
 
                     attribute_question = [
-                        inquirer.Checkbox('attr', message="Choose attributes", choices=['Primary Key', 'Nullable'])
+                        inquirer.Checkbox(
+                            'attr',
+                            message="Choose attributes",
+                            choices=['Primary Key', 'Nullable']
+                        )
                     ]
                     self.clear()
                     attribute_answer = inquirer.prompt(attribute_question)
@@ -164,7 +208,7 @@ class Phypster:
                         data["columns"].append([attribute_answer["name"], attribute_answer["typeData"], primaryKey, nullable])
                     else:
                         enums_name = list(self.ENUMS.keys())
-                        data["enums"].append({"name" : enum_answer["enum"], "nullable": nullable, "primaryKey": primaryKey})
+                        data["enums"].append({"name": enum_answer["enum"], "nullable": nullable, "primaryKey": primaryKey})
 
                 else:
                     entities_name = list(self.ENTITIES.keys())
@@ -213,15 +257,14 @@ class Phypster:
 
         self.ENTITIES[data['name']] = entity
 
-    def createEnum(self, data = None):
-        if data == None:
+    def createEnum(self, data=None):
+        if data is None:
             data = {"listItems": []}
             cond_stop = False
             self.clear()
             name_question = [inquirer.Text('name', message="What's the entity name")]
             name_answer = inquirer.prompt(name_question)
             data["name"] = name_answer["name"]
-            
 
             choose_step = [inquirer.List('choose', message="What now", choices=['Add item into the enum', 'Stop'])]
 
@@ -230,7 +273,7 @@ class Phypster:
                 step_answer = inquirer.prompt(choose_step)
 
                 if step_answer['choose'] == 'Stop':
-                        cond_stop = True
+                    cond_stop = True
                 elif step_answer['choose'] == 'Add item into the enum':
                     questions = [inquirer.Text('name', message="What's the item name")]
                     self.clear()

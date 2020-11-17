@@ -1,5 +1,6 @@
 from src import app, db, logger
 
+
 def clearTables():
     with app.app_context():
         try:

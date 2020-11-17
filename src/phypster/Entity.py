@@ -20,8 +20,16 @@ class Column:
         else:
             return 'str'
 
+
+class AssociateTable:
+    def __init__(self, entity1, entity2):
+        self.name: str = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
+        self.entity1: Entity = entity1
+        self.entity2: Entity = entity2
+
+
 class RelationShip:
-    def __init__(self, entity1, entity2, isOneToOne: bool = False, isOneToMany: bool = False, isManyToOne: bool = False, isManyToMany: bool = False, associateTable = None):
+    def __init__(self, entity1, entity2, isOneToOne: bool = False, isOneToMany: bool = False, isManyToOne: bool = False, isManyToMany: bool = False, associateTable: AssociateTable = None):
         self.entity1: Entity = entity1
         self.entity2: Entity = entity2
         self.isOneToOne: bool = isOneToOne
@@ -30,11 +38,6 @@ class RelationShip:
         self.isManyToMany: bool = isManyToMany
         self.associateTable: AssociateTable = associateTable
 
-class AssociateTable:
-    def __init__(self, entity1, entity2):
-        self.name: str = "tj_" + entity1.nameEntity.lower() + "_" + entity1.subName + "_" + entity2.nameEntity.lower() + "_" + entity2.subName
-        self.entity1: Entity = entity1
-        self.entity2: Entity = entity2
 
 class EnumEntity:
     def __init__(self, name: str) -> None:
@@ -44,10 +47,12 @@ class EnumEntity:
     def addItem(self, item: str):
         self.listItems.append(item)
 
+
 class EnumColumn:
     def __init__(self, enum: EnumEntity, nullable: bool) -> None:
         self.enum: EnumEntity = enum
         self.nullable: bool = nullable
+
 
 class Entity:
     def __init__(self, name: str):
@@ -63,7 +68,7 @@ class Entity:
             self.primaryKey = Column(nameColumn, typeData, True)
         else:
             self.columns.append(Column(nameColumn, typeData, False, nullable=nullable))
-        
+
     def addRelationShip(self, relationship: RelationShip):
         self.relationships.append(relationship)
 
@@ -71,7 +76,7 @@ class Entity:
         self.enums.append(EnumColumn(myEnum, nullable))
 
     def getPrimaryKey(self):
-        if self.primaryKey == None:
+        if self.primaryKey is None:
             self.primaryKey = Column("id", "Integer", True)
         return self.primaryKey
 
