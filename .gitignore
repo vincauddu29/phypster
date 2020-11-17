@@ -1,6 +1,8 @@
-src
 migrations
 Tests
 .vscode
 *.log
 __pycache__
+build
+dist
+*egg-info

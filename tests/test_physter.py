@@ -415,3 +415,17 @@ class PhypsterTest(TestCase):
         assert os.path.exists("Tests/Mappeurs") == True
         assert os.path.exists("Tests/Ressources") == True
         assert os.path.exists("server.py") == True
+
+    def test_generateFiles(self):
+        self.phypster.init()
+
+        with open("mocks.json", "r") as f:
+            data_json = json.load(f)
+
+        for data_enum in data_json["enums"]:
+            self.phypster.createEnum(data_enum)
+
+        for data_entity in data_json["entities"]:
+            self.phypster.createEntity(data_entity)
+
+        self.phypster.generateFiles()

@@ -1,0 +1,2 @@
+include src/phypster/static/*
+include src/phypster/static/template/*

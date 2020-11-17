@@ -1,11 +1,11 @@
 #!/usr/bin/python3
-import os, inquirer, shutil, json
+import os, inquirer, shutil
 from typing import Dict, List
 from distutils.sysconfig import get_python_lib
 from jinja2 import Template
-import argparse
+import setuptools as _
 
-from Entity import *
+from .Entity import *
 
 class Phypster:
     def __init__(self):
@@ -46,22 +46,24 @@ class Phypster:
         if not os.path.exists(name):
             os.mkdir(name)
             self.info("[x] {0} directory created".format(name))
-            open("{0}/__init__.py".format(name), "w").close()
-            self.info("[x] {0}/__init__.py created".format(name))
+            open("{0}{1}__init__.py".format(name, os.sep), "w").close()
+            self.info("[x] {0}{1}__init__.py created".format(name, os.sep))
         else:
             self.info("[x] {0} directory skip".format(name))
 
     def getPathFileInStatic(self, path: str):
         BASE_DIR = None
 
-        if os.path.isfile(get_python_lib() + "/phypster"):
-            BASE_DIR = get_python_lib() + "/phypster"
+        pathSitePackageUser = os.sep.join(_.__path__[0].split(os.sep)[:-1])
+
+        if os.path.exists(pathSitePackageUser + os.sep + "phypster"):
+            BASE_DIR = pathSitePackageUser + os.sep + "phypster"
+        elif os.path.isfile(get_python_lib() + os.sep + "phypster"):
+            BASE_DIR = get_python_lib() + os.sep + "phypster"
         else:
             BASE_DIR = os.getcwd()
 
-        self.debug("BASE_DIR = {0}".format(BASE_DIR))
-
-        return BASE_DIR + "/static/" + path
+        return BASE_DIR + os.sep + "static" + os.sep + path
 
     def init(self):
         """ Init a new project """
@@ -356,39 +358,3 @@ class Phypster:
             self.generateEnumsFiles(enum)
 
         self.writeAppFile()
-
-#############
-# argsparse #
-#############
-parser = argparse.ArgumentParser(description='Flask starter')
-parser.add_argument('--import_json', help='import json model')
-
-args = parser.parse_args()
-
-phypster = Phypster()
-
-if __name__ == "__main__":
-    if args.import_json != None:
-        with open("mocks.json", "r") as f:
-            data_json = json.load(f)
-
-        for data_enum in data_json["enums"]:
-            phypster.createEnum(data_enum)
-
-        for data_entity in data_json["entities"]:
-            phypster.createEntity(data_entity)
-    else:
-        cond_stop = False
-        choose_step = [inquirer.List('choose', message="What now", choices=['Create entity', 'Create enum', 'Stop'])]
-
-        while not cond_stop:
-            step_answer = inquirer.prompt(choose_step)
-
-            if step_answer['choose'] == 'Create entity':
-                phypster.createEntity()
-            elif step_answer['choose'] == 'Create enum':
-                phypster.createEnum()
-            else:
-                cond_stop = True
-    phypster.init()
-    phypster.generateFiles()

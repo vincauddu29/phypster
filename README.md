@@ -5,8 +5,8 @@ Jhypster for python developper. Flask starter.
 \#Jhypster \#Python \#Flask
 
 ## Install
-
-TODO
+1) git clone
+2) make install
 
 ## Build a new application
 ### JSON file (Recommanded)
@@ -88,7 +88,7 @@ CLIENT <- (DTO) -> RESSOURCE <- (DTO) -> SERVICE <- (Entity) -> REPOSITORY <- (E
 ## Contributing
 Enjoy :) and make pull request.
 
-* [ ] Write more tests
-* [ ] Write documentation
-* [ ] Implement jdl (jhypster file) parser
-* [ ] Implement installer globally
+[ ] Write more tests
+[ ] Write documentation
+[ ] Implement jdl (jhypster file) parser
+[x] Implement installer
