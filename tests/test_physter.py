@@ -1,6 +1,9 @@
-import json, os, shutil
+import json
+import os
+import shutil
 from phypster import Phypster
 from unittest import TestCase
+
 
 class PhypsterTest(TestCase):
     def setUp(self):
@@ -12,7 +15,6 @@ class PhypsterTest(TestCase):
 
         if os.path.exists("server.py"):
             os.remove("server.py")
-
 
     def test_init(self):
         assert len(self.phypster.ASSOCIATETABLES) == 0
@@ -85,7 +87,7 @@ class PhypsterTest(TestCase):
         assert len(entity.columns) == 2
         assert len(entity.relationships) == 0
         assert len(entity.enums) == 0
-        assert pk != None
+        assert pk is not None
         assert pk.nameColumn == "id"
 
     def test_createEntityOneToOne(self):
@@ -99,7 +101,7 @@ class PhypsterTest(TestCase):
             ],
             "relationships": [],
             "enums": []
-        },{
+        }, {
             "name": nameEntity2,
             "columns": [
                 ["col1", "Float", False, False],
@@ -132,15 +134,15 @@ class PhypsterTest(TestCase):
         assert e2_r1.entity1.nameEntity == nameEntity2
         assert e2_r1.entity2.nameEntity == nameEntity1
 
-        assert e1_r1.isOneToOne == True
-        assert e1_r1.isManyToOne == False
-        assert e1_r1.isOneToMany == False
-        assert e1_r1.isManyToMany == False
+        assert e1_r1.isOneToOne
+        assert not e1_r1.isManyToOne
+        assert not e1_r1.isOneToMany
+        assert not e1_r1.isManyToMany
 
-        assert e2_r1.isOneToOne == True
-        assert e2_r1.isManyToOne == False
-        assert e2_r1.isOneToMany == False
-        assert e2_r1.isManyToMany == False
+        assert e2_r1.isOneToOne
+        assert not e2_r1.isManyToOne
+        assert not e2_r1.isOneToMany
+        assert not e2_r1.isManyToMany
 
         assert len(self.phypster.ASSOCIATETABLES) == 0
 
@@ -155,7 +157,7 @@ class PhypsterTest(TestCase):
             ],
             "relationships": [],
             "enums": []
-        },{
+        }, {
             "name": nameEntity2,
             "columns": [
                 ["col1", "Float", False, False],
@@ -188,15 +190,15 @@ class PhypsterTest(TestCase):
         assert e2_r1.entity1.nameEntity == nameEntity2
         assert e2_r1.entity2.nameEntity == nameEntity1
 
-        assert e1_r1.isOneToOne == False
-        assert e1_r1.isManyToOne == True
-        assert e1_r1.isOneToMany == False
-        assert e1_r1.isManyToMany == False
+        assert not e1_r1.isOneToOne
+        assert e1_r1.isManyToOne
+        assert not e1_r1.isOneToMany
+        assert not e1_r1.isManyToMany
 
-        assert e2_r1.isOneToOne == False
-        assert e2_r1.isManyToOne == True
-        assert e2_r1.isOneToMany == False
-        assert e2_r1.isManyToMany == False
+        assert not e2_r1.isOneToOne
+        assert e2_r1.isManyToOne
+        assert not e2_r1.isOneToMany
+        assert not e2_r1.isManyToMany
 
         assert len(self.phypster.ASSOCIATETABLES) == 0
 
@@ -211,7 +213,7 @@ class PhypsterTest(TestCase):
             ],
             "relationships": [],
             "enums": []
-        },{
+        }, {
             "name": nameEntity2,
             "columns": [
                 ["col1", "Float", False, False],
@@ -244,15 +246,15 @@ class PhypsterTest(TestCase):
         assert e2_r1.entity1.nameEntity == nameEntity2
         assert e2_r1.entity2.nameEntity == nameEntity1
 
-        assert e1_r1.isOneToOne == False
-        assert e1_r1.isManyToOne == False
-        assert e1_r1.isOneToMany == True
-        assert e1_r1.isManyToMany == False
+        assert not e1_r1.isOneToOne
+        assert not e1_r1.isManyToOne
+        assert e1_r1.isOneToMany
+        assert not e1_r1.isManyToMany
 
-        assert e2_r1.isOneToOne == False
-        assert e2_r1.isManyToOne == False
-        assert e2_r1.isOneToMany == True
-        assert e2_r1.isManyToMany == False
+        assert not e2_r1.isOneToOne
+        assert not e2_r1.isManyToOne
+        assert e2_r1.isOneToMany
+        assert not e2_r1.isManyToMany
 
         assert len(self.phypster.ASSOCIATETABLES) == 0
 
@@ -267,7 +269,7 @@ class PhypsterTest(TestCase):
             ],
             "relationships": [],
             "enums": []
-        },{
+        }, {
             "name": nameEntity2,
             "columns": [
                 ["col1", "Float", False, False],
@@ -300,15 +302,15 @@ class PhypsterTest(TestCase):
         assert e2_r1.entity1.nameEntity == nameEntity2
         assert e2_r1.entity2.nameEntity == nameEntity1
 
-        assert e1_r1.isOneToOne == False
-        assert e1_r1.isManyToOne == False
-        assert e1_r1.isOneToMany == False
-        assert e1_r1.isManyToMany == True
+        assert not e1_r1.isOneToOne
+        assert not e1_r1.isManyToOne
+        assert not e1_r1.isOneToMany
+        assert e1_r1.isManyToMany
 
-        assert e2_r1.isOneToOne == False
-        assert e2_r1.isManyToOne == False
-        assert e2_r1.isOneToMany == False
-        assert e2_r1.isManyToMany == True
+        assert not e2_r1.isOneToOne
+        assert not e2_r1.isManyToOne
+        assert not e2_r1.isOneToMany
+        assert e2_r1.isManyToMany
 
         assert len(self.phypster.ASSOCIATETABLES) == 1
 
@@ -345,7 +347,7 @@ class PhypsterTest(TestCase):
         assert len(self.phypster.ENTITIES['Entity1'].enums) == 1
 
         enum = self.phypster.ENTITIES['Entity1'].enums[0]
-        assert enum.nullable == True
+        assert enum.nullable
         assert enum.enum.nameEnum == "TypeData"
 
     def test_createEntityWithEnumNotNullable(self):
@@ -381,40 +383,40 @@ class PhypsterTest(TestCase):
         assert len(self.phypster.ENTITIES['Entity1'].enums) == 1
 
         enum = self.phypster.ENTITIES['Entity1'].enums[0]
-        assert enum.nullable == False
+        assert not enum.nullable
         assert enum.enum.nameEnum == "TypeData"
 
-    def test_init(self):
+    def test_init_phypster(self):
         self.phypster.init()
 
-        assert os.path.exists("src") == True
-        assert os.path.exists("src/Config") == True
-        assert os.path.exists("src/Config/SecurityConfig.py") == True
-        assert os.path.exists("src/Config/Logger.py") == True
-        assert os.path.exists("src/Config/ApplicationConfig.py") == True
-        assert os.path.exists("src/Models") == True
-        assert os.path.exists("src/DTOs") == True
-        assert os.path.exists("src/Repositories") == True
-        assert os.path.exists("src/Services") == True
-        assert os.path.exists("src/Mappeurs") == True
-        assert os.path.exists("src/Ressources") == True
-        assert os.path.exists("src/Logs") == True
-        assert os.path.exists("src/Logs/debug.log") == True
-        assert os.path.exists("src/Logs/info.log") == True
-        assert os.path.exists("src/Logs/error.log") == True
-        assert os.path.exists("src/Parsers") == True
-        assert os.path.exists("src/docker") == True
-        assert os.path.exists("src/docker/docker-compose.test.yml") == True
-        assert os.path.exists("src/Enums") == True
-        assert os.path.exists("Tests") == True
-        assert os.path.exists("Tests/helpersTest.py") == True
-        assert os.path.exists("Tests/Models") == True
-        assert os.path.exists("Tests/DTOs") == True
-        assert os.path.exists("Tests/Repositories") == True
-        assert os.path.exists("Tests/Services") == True
-        assert os.path.exists("Tests/Mappeurs") == True
-        assert os.path.exists("Tests/Ressources") == True
-        assert os.path.exists("server.py") == True
+        assert os.path.exists("src")
+        assert os.path.exists("src/Config")
+        assert os.path.exists("src/Config/SecurityConfig.py")
+        assert os.path.exists("src/Config/Logger.py")
+        assert os.path.exists("src/Config/ApplicationConfig.py")
+        assert os.path.exists("src/Models")
+        assert os.path.exists("src/DTOs")
+        assert os.path.exists("src/Repositories")
+        assert os.path.exists("src/Services")
+        assert os.path.exists("src/Mappeurs")
+        assert os.path.exists("src/Ressources")
+        assert os.path.exists("src/Logs")
+        assert os.path.exists("src/Logs/debug.log")
+        assert os.path.exists("src/Logs/info.log")
+        assert os.path.exists("src/Logs/error.log")
+        assert os.path.exists("src/Parsers")
+        assert os.path.exists("src/docker")
+        assert os.path.exists("src/docker/docker-compose.test.yml")
+        assert os.path.exists("src/Enums")
+        assert os.path.exists("Tests")
+        assert os.path.exists("Tests/helpersTest.py")
+        assert os.path.exists("Tests/Models")
+        assert os.path.exists("Tests/DTOs")
+        assert os.path.exists("Tests/Repositories")
+        assert os.path.exists("Tests/Services")
+        assert os.path.exists("Tests/Mappeurs")
+        assert os.path.exists("Tests/Ressources")
+        assert os.path.exists("server.py")
 
     def test_generateFiles(self):
         self.phypster.init()
