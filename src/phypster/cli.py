@@ -36,9 +36,11 @@ def main():
             step_answer = inquirer.prompt(choose_step)
 
             if step_answer['choose'] == 'Create entity':
-                phypster.createEntity()
+                data = phypster.generateEntityData()
+                phypster.createEntity(data)
             elif step_answer['choose'] == 'Create enum':
-                phypster.createEnum()
+                data = phypster.generateEnumData()
+                phypster.createEnum(data)
             else:
                 cond_stop = True
 
