@@ -29,9 +29,9 @@ Sample:
         {
             "name": "MyEntity1",
             "columns": [
-                ["name", "String", false, false],
-                ["col1", "Float", false, false],
-                ["col2", "DateTime", false, false]
+                {"name": "name", "type": "String", "primary": false, "nullable": false},
+                {"name": "col1", "type": "Float", "primary": false, "nullable": false},
+                {"name": "col2", "type": "DateTime", "primary": false, "nullable": false}
             ],
             "relationships": [],
             "enums": [
@@ -44,8 +44,8 @@ Sample:
         {
             "name": "MyEntity2",
             "columns": [
-                ["identity", "Integer", true, true],
-                ["name", "String", false, false]
+                {"name": "identity", "type": "Integer", "primary": true, "nullable": true},
+                {"name": "name", "type": "String", "primary": false, "nullable": false}
             ],
             "relationships": [
                 {

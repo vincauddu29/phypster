@@ -69,8 +69,8 @@ class PhypsterTest(TestCase):
         data_entity = {
             "name": "Entity1",
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": True, "nullable": True},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": [
@@ -96,16 +96,16 @@ class PhypsterTest(TestCase):
         data_entities = [{
             "name": nameEntity1,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": []
         }, {
             "name": nameEntity2,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [
                 {
@@ -152,16 +152,16 @@ class PhypsterTest(TestCase):
         data_entities = [{
             "name": nameEntity1,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": []
         }, {
             "name": nameEntity2,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [
                 {
@@ -208,16 +208,16 @@ class PhypsterTest(TestCase):
         data_entities = [{
             "name": nameEntity1,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": []
         }, {
             "name": nameEntity2,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [
                 {
@@ -264,16 +264,16 @@ class PhypsterTest(TestCase):
         data_entities = [{
             "name": nameEntity1,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": []
         }, {
             "name": nameEntity2,
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [
                 {
@@ -330,8 +330,8 @@ class PhypsterTest(TestCase):
         data_entity = {
             "name": "Entity1",
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": [
@@ -366,8 +366,8 @@ class PhypsterTest(TestCase):
         data_entity = {
             "name": "Entity1",
             "columns": [
-                ["col1", "Float", False, False],
-                ["col2", "DateTime", False, False]
+                {"name": "col1", "type": "Float", "primary": False, "nullable": False},
+                {"name": "col2", "type": "DateTime", "primary": False, "nullable": False}
             ],
             "relationships": [],
             "enums": [
