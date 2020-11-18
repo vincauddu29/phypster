@@ -1,7 +1,5 @@
 import setuptools
 
-import src.phypster
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 

@@ -1,8 +1,8 @@
-import argparse, json, inquirer
+import argparse
+import json
+import inquirer
 from .phypster import Phypster
 
-
-import setuptools as _
 
 def main():
     #############
@@ -19,7 +19,7 @@ def main():
 
     print("DEBUG = {0}".format(phypster.DEBUG))
 
-    if args.import_json != None:
+    if args.import_json is not None:
         with open("mocks.json", "r") as f:
             data_json = json.load(f)
 
@@ -36,14 +36,17 @@ def main():
             step_answer = inquirer.prompt(choose_step)
 
             if step_answer['choose'] == 'Create entity':
-                phypster.createEntity()
+                data = phypster.generateEntityData()
+                phypster.createEntity(data)
             elif step_answer['choose'] == 'Create enum':
-                phypster.createEnum()
+                data = phypster.generateEnumData()
+                phypster.createEnum(data)
             else:
                 cond_stop = True
 
     phypster.init()
     phypster.generateFiles()
+
 
 if __name__ == "__main__":
     main()

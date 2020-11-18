@@ -12,9 +12,9 @@
         {
             "name": "Parent",
             "columns": [
-                ["name", "String", false, false],
-                ["col1", "Float", false, false],
-                ["col2", "DateTime", false, false]
+                {"name": "name", "type": "String", "primary": false, "nullable": false},
+                {"name": "col1", "type": "Float", "primary": false, "nullable": false},
+                {"name": "col2", "type": "DateTime", "primary": false, "nullable": false}
             ],
             "relationships": [],
             "enums": [
@@ -27,8 +27,8 @@
         {
             "name": "Child",
             "columns": [
-                ["identity", "Integer", true, true],
-                ["name", "String", false, false]
+                {"name": "identity", "type": "Integer", "primary": true, "nullable": true},
+                {"name": "name", "type": "String", "primary": false, "nullable": false}
             ],
             "relationships": [
                 {
@@ -41,7 +41,7 @@
         {
             "name": "Adress",
             "columns": [
-                ["name", "String", false, false]
+                {"name": "name", "type": "String", "primary": false, "nullable": false}
             ],
             "relationships": [
                 {
@@ -54,7 +54,7 @@
         {
             "name": "Job",
             "columns": [
-                ["name", "String", false, false]
+                {"name": "name", "type": "String", "primary": false, "nullable": false}
             ],
             "relationships": [
                 {
@@ -67,7 +67,7 @@
         {
             "name": "Present",
             "columns": [
-                ["col1", "Float", false, true]
+                {"name": "col1", "type": "Float", "primary": false, "nullable": true}
             ],
             "relationships": [
                 {
