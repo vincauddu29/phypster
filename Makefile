@@ -1,7 +1,18 @@
 clean:
-	rm -rf src
+	rm -rf src/Models
+	rm -rf src/DTOs
+	rm -rf src/Repositories
+	rm -rf src/Services
+	rm -rf src/Mappeurs
+	rm -rf src/Ressources
+	rm -rf src/Logs
+	rm -rf src/Parsers
+	rm -rf src/docker
+	rm -rf src/Enums
+	rm -rf src/Config
 	rm -rf Tests
 	rm -rf migrations
+	rm server.py
 
 generate: clean
 	python3 tests.py
