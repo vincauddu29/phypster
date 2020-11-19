@@ -43,17 +43,11 @@
             "pathInput": "template/service.py.j2",
             "pathOutput": "src/Services/{0}Service.py"
         }, {
-            "pathInput": "template/associatedTable.py.j2",
-            "pathOutput": "src/Models/{0}.py"
-        }, {
             "pathInput": "template/parser.py.j2",
             "pathOutput": "src/Parsers/{0}Parser.py"
         }, {
             "pathInput": "template/ressource.py.j2",
             "pathOutput": "src/Ressources/{0}Ressource.py"
-        }, {
-            "pathInput": "template/enum.py.j2",
-            "pathOutput": "src/Enums/{0}Enum.py"
         }, {
             "pathInput": "template/entityTest.py.j2",
             "pathOutput": "Tests/Models/test_{0}EntityTest.py"

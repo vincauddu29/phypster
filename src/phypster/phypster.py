@@ -300,6 +300,14 @@ class Phypster:
         self.writeFile(pathStaticFile, pathOutput.format(entity.nameEntity), entity)
         self.debug("[x] {0} file created".format(pathOutput))
 
+    def generateEnumsFiles(self, entity):
+        self.writeFile("template/enum.py.j2", "src/Enums/{0}Enum.py".format(entity.nameEnum), entity)
+        self.debug("[x] {0}Enum file created".format(entity.nameEnum))
+
+    def generateAssociatedTableFiles(self, associatedTable):
+        self.writeFile("template/associatedTable.py.j2", "src/Models/{0}.py".format(associatedTable.name), associatedTable)
+        self.info("[x] {0} file created".format(associatedTable.name))
+
     def generateFiles(self):
         entityfilesPaths = self.CONFIG_FILES["entityFiles"]
         for name in self.ENTITIES.keys():
