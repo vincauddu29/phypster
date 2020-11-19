@@ -2,6 +2,7 @@
 import os
 import inquirer
 import shutil
+import json
 from typing import Dict, List
 from distutils.sysconfig import get_python_lib
 from jinja2 import Template
@@ -15,6 +16,7 @@ class Phypster:
         self.ASSOCIATETABLES: List[AssociateTable] = []
         self.ENTITIES: Dict[str, Entity] = dict()
         self.ENUMS: Dict[str, EnumEntity] = dict()
+        self.CONFIG_FILES = json.load("configFiles.json")
 
     def log(self, message: str, type_message="DEBUG"):
         if type_message == "INFO":
@@ -99,38 +101,15 @@ class Phypster:
             if list_directories_name[directory_name]:
                 self.createDirectory("Tests/" + directory_name)
 
-        # helpers Test
-        path = self.getPathFileInStatic("helpersTest.py")
-        shutil.copy(path, "Tests/helpersTest.py")
-
-        # Security config
-        path = self.getPathFileInStatic("security.py")
-        shutil.copy(path, "src/Config/SecurityConfig.py")
-
-        # Logger
-        path = self.getPathFileInStatic("logger.py")
-        shutil.copy(path, "src/Config/Logger.py")
-
-        self.createDirectory("Tests/Mocks")
-
-        # Copy requirements.txt + install dependencies
-        path = self.getPathFileInStatic("requirements.txt")
-        shutil.copy(path, "requirements.txt")
-        os.system('pip3 install -r requirements.txt')
+        for pathsConfig in self.CONFIG_FILES["staticFiles"]:
+            path = self.getPathFileInStatic(pathsConfig["pathInput"])
+            shutil.copy(path, pathsConfig["pathOutput"])
+            if pathsConfig["postCreateCmd"] != "":
+                os.system(pathsConfig["postCreateCmd"])
+            self.debug("[x] {0} file created".format(pathsConfig["pathOutput"]))
+        
 
         self.writeAppFile()
-
-        path = self.getPathFileInStatic("config.py")
-        shutil.copy(path, "src/Config/ApplicationConfig.py")
-        self.info("[x] create config.py")
-        # shutil.copy(getPathFileInStatic("__init__.py"), "src/__init__.py")
-        # info("[x] create __init__.py")
-        path = self.getPathFileInStatic("server.py")
-        shutil.copy(path, "server.py")
-        self.info("[x] create server.py")
-        path = self.getPathFileInStatic("docker-compose.test.yml")
-        shutil.copy(path, "src/docker/docker-compose.test.yml")
-        self.info("[x] create docker-compose.test.yml")
 
     def generateEntityData(self):
         cond_stop = False
@@ -316,90 +295,16 @@ class Phypster:
             f.write(data)
             self.info("[x] create (or updated) __init__.py")
 
-    def generateEntitiesFiles(self, entity):
-        self.writeFile("template/entity.py.j2", "src/Models/{0}Entity.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Entity file created".format(entity.nameEntity))
-
-    def generateRepositoriesFiles(self, entity):
-        self.writeFile("template/repository.py.j2", "src/Repositories/{0}Repository.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Repository file created".format(entity.nameEntity))
-
-    def generateDTOsFiles(self, entity):
-        self.writeFile("template/dtoV1.py.j2", "src/DTOs/{0}DTO.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}DTO file created".format(entity.nameEntity))
-
-    def generateMappeursFiles(self, entity):
-        self.writeFile("template/mappeur.py.j2", "src/Mappeurs/{0}Mappeur.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Mappeur file created".format(entity.nameEntity))
-
-    def generateServicesFiles(self, entity):
-        self.writeFile("template/service.py.j2", "src/Services/{0}Service.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Service file created".format(entity.nameEntity))
-
-    def generateAssociatedTableFiles(self, associatedTable):
-        self.writeFile("template/associatedTable.py.j2", "src/Models/{0}.py".format(associatedTable.name), associatedTable)
-        self.info("[x] {0} file created".format(associatedTable.name))
-
-    def generateParsersFiles(self, entity):
-        self.writeFile("template/parser.py.j2", "src/Parsers/{0}Parser.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Parser file created".format(entity.nameEntity))
-
-    def generateRessourcesFiles(self, entity):
-        self.writeFile("template/ressource.py.j2", "src/Ressources/{0}Ressource.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Ressource file created".format(entity.nameEntity))
-
-    def generateEnumsFiles(self, entity):
-        self.writeFile("template/enum.py.j2", "src/Enums/{0}Enum.py".format(entity.nameEnum), entity)
-        self.info("[x] {0}Enum file created".format(entity.nameEnum))
-
-    # TESTS
-    def generateEntitiesTestsFiles(self, entity):
-        self.writeFile("template/entityTest.py.j2", "Tests/Models/test_{0}EntityTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}EntityTest file created".format(entity.nameEntity))
-
-    def generateDTOsTestsFiles(self, entity):
-        self.writeFile("template/dtoV1Test.py.j2", "Tests/DTOs/test_{0}DTOTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}DTOTest file created".format(entity.nameEntity))
-
-    def generateMappeursTestsFiles(self, entity):
-        self.writeFile("template/mappeurTest.py.j2", "Tests/Mappeurs/test_{0}MappeurTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}MappeurTest file created".format(entity.nameEntity))
-
-    def generateRessourcesTestsFiles(self, entity):
-        self.writeFile("template/ressourceTest.py.j2", "Tests/Ressources/test_{0}RessourceTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}RessourceTest file created".format(entity.nameEntity))
-
-    def generateRepositoriesTestsFiles(self, entity):
-        self.writeFile("template/repositoryTest.py.j2", "Tests/Repositories/test_{0}RepositoryTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}RepositoryTest file created".format(entity.nameEntity))
-
-    def generateServicesTestsFiles(self, entity):
-        self.writeFile("template/serviceTest.py.j2", "Tests/Services/test_{0}ServiceTest.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}ServiceTest file created".format(entity.nameEntity))
-
-    def generateMocksTestsFiles(self, entity):
-        self.writeFile("template/mock.py.j2", "Tests/Mocks/{0}Mock.py".format(entity.nameEntity), entity)
-        self.info("[x] {0}Mock file created".format(entity.nameEntity))
+    def generateFiles(self, entity: Entity, pathStaticFile: str, pathOutput: str):
+        self.writeFile(pathStaticFile, pathOutput.format(entity.nameEntity), entity)
+        self.debug("[x] {0} file created".format(pathOutput))
 
     def generateFiles(self):
+        entityfilesPaths = self.CONFIG_FILES["entityFiles"]
         for name in self.ENTITIES.keys():
             entity = self.ENTITIES[name]
-            self.generateEntitiesFiles(entity)
-            self.generateRepositoriesFiles(entity)
-            self.generateDTOsFiles(entity)
-            self.generateMappeursFiles(entity)
-            self.generateServicesFiles(entity)
-            self.generateParsersFiles(entity)
-            self.generateRessourcesFiles(entity)
-
-            # tests
-            self.generateEntitiesTestsFiles(entity)
-            self.generateDTOsTestsFiles(entity)
-            self.generateMappeursTestsFiles(entity)
-            # self.generateRessourcesTestsFiles(entity)
-            self.generateRepositoriesTestsFiles(entity)
-            self.generateServicesTestsFiles(entity)
-            self.generateMocksTestsFiles(entity)
+            for paths in entityfilesPaths:
+                self.generateFiles(entity, paths["pathInput"], paths["pathOutput"])
 
         for associateTable in self.ASSOCIATETABLES:
             self.generateAssociatedTableFiles(associateTable)

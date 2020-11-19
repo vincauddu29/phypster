@@ -1,0 +1,80 @@
+{
+    "staticFiles": [
+        {
+            "pathInput": "helpersTest.py",
+            "pathOutput": "Tests/helpersTest.py",
+            "postCreateCmd": ""
+        },{
+            "pathInput": "security.py",
+            "pathOutput": "src/Config/SecurityConfig.py",
+            "postCreateCmd": ""
+        },{
+            "pathInput": "logger.py",
+            "pathOutput": "src/Config/LoggerConfig.py",
+            "postCreateCmd": ""
+        },{
+            "pathInput": "requirements.txt",
+            "pathOutput": "requirements.txt",
+            "postCreateCmd": "pip3 install -r requirements.txt"
+        },{
+            "pathInput": "config.py",
+            "pathOutput": "src/Config/ApplicationConfig.py"
+        },{
+            "pathInput": "server.py",
+            "pathOutput": "server.py"
+        },{
+            "pathInput": "docker-compose.test.yml",
+            "pathOutput": "src/docker/docker-compose.test.yml"
+        }
+    ], "entityFiles" : [
+        {
+            "pathInput": "template/entity.py.j2",
+            "pathOutput": "src/Models/{0}Entity.py"
+        }, {
+            "pathInput": "template/repository.py.j2",
+            "pathOutput": "src/Repositories/{0}Repository.py"
+        }, {
+            "pathInput": "template/dtoV1.py.j2",
+            "pathOutput": "src/DTOs/{0}DTO.py"
+        }, {
+            "pathInput": "template/mappeur.py.j2",
+            "pathOutput": "src/Mappeurs/{0}Mappeur.py"
+        }, {
+            "pathInput": "template/service.py.j2",
+            "pathOutput": "src/Services/{0}Service.py"
+        }, {
+            "pathInput": "template/associatedTable.py.j2",
+            "pathOutput": "src/Models/{0}.py"
+        }, {
+            "pathInput": "template/parser.py.j2",
+            "pathOutput": "src/Parsers/{0}Parser.py"
+        }, {
+            "pathInput": "template/ressource.py.j2",
+            "pathOutput": "src/Ressources/{0}Ressource.py"
+        }, {
+            "pathInput": "template/enum.py.j2",
+            "pathOutput": "src/Enums/{0}Enum.py"
+        }, {
+            "pathInput": "template/entityTest.py.j2",
+            "pathOutput": "Tests/Models/test_{0}EntityTest.py"
+        }, {
+            "pathInput": "template/dtoV1Test.py.j2",
+            "pathOutput": "Tests/DTOs/test_{0}DTOTest.py"
+        }, {
+            "pathInput": "template/mappeurTest.py.j2",
+            "pathOutput": "Tests/Mappeurs/test_{0}MappeurTest.py"
+        }, {
+            "pathInput": "template/ressourceTest.py.j2",
+            "pathOutput": "Tests/Ressources/test_{0}RessourceTest.py"
+        }, {
+            "pathInput": "template/repositoryTest.py.j2",
+            "pathOutput": "Tests/Repositories/test_{0}RepositoryTest.py"
+        }, {
+            "pathInput": "template/serviceTest.py.j2",
+            "pathOutput": "Tests/Services/test_{0}ServiceTest.py"
+        }, {
+            "pathInput": "template/mock.py.j2",
+            "pathOutput": "Tests/Mocks/{0}Mock.py"
+        }
+    ]
+}
