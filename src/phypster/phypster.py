@@ -16,7 +16,8 @@ class Phypster:
         self.ASSOCIATETABLES: List[AssociateTable] = []
         self.ENTITIES: Dict[str, Entity] = dict()
         self.ENUMS: Dict[str, EnumEntity] = dict()
-        self.CONFIG_FILES = json.load("configFiles.json")
+        with open("configFiles.json") as f:
+            self.CONFIG_FILES = json.load(f)
 
     def log(self, message: str, type_message="DEBUG"):
         if type_message == "INFO":
