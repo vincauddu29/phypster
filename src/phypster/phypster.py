@@ -113,6 +113,11 @@ class Phypster:
 
         self.createDirectory("Tests/Mocks")
 
+        # Copy requirements.txt + install dependencies
+        path = self.getPathFileInStatic("requirements.txt")
+        shutil.copy(path, "requirements.txt")
+        os.system('pip3 install -r requirements.txt')
+
         self.writeAppFile()
 
         path = self.getPathFileInStatic("config.py")
