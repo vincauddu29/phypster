@@ -6,6 +6,26 @@ from unittest import TestCase
 
 
 class PhypsterTest(TestCase):
+    def __init__(self) -> None:
+        self.APP_PATHS = {
+            "directories": [
+                "src{0}Config",
+                "src{0}Models",
+                "src{0}DTOs",
+                "src{0}Repositories",
+                "src{0}Services",
+                "src{0}Mappeurs",
+                "src{0}Ressources",
+                "src{0}Logs",
+                "src{0}Parsers",
+                "src{0}docker",
+                "src{0}Enums",
+                "Tests"
+            ],
+            "files": [
+                "server.py"
+            ]
+        }
     def setUp(self):
         self.phypster = Phypster()
         list_paths = ["src", "Tests", "migrations"]
@@ -13,8 +33,16 @@ class PhypsterTest(TestCase):
             if os.path.exists(path):
                 shutil.rmtree(path)
 
-        if os.path.exists("server.py"):
-            os.remove("server.py")
+    def cleanRepositories(self):
+        for path in self.APP_PATHS["directories"]:
+            path_formatted = path.format(os.path.sep)
+            if os.path.exists(path_formatted):
+                shutil.rmtree(path_formatted)
+
+        for path in self.APP_PATHS["files"]:
+            path_formatted = path.format(os.path.sep)
+            if os.path.exists(path_formatted):
+                os.remove(path_formatted)
 
     def test_init(self):
         assert len(self.phypster.ASSOCIATETABLES) == 0
@@ -81,6 +109,8 @@ class PhypsterTest(TestCase):
 
         entity = self.phypster.ENTITIES["Entity1"]
         pk = entity.getPrimaryKey()
+
+        print(entity.columns)
 
         assert len(self.phypster.ENTITIES) == 1
         assert entity.nameEntity == "Entity1"
@@ -418,6 +448,8 @@ class PhypsterTest(TestCase):
         assert os.path.exists("Tests{0}Ressources".format(os.path.sep))
         assert os.path.exists("server.py")
 
+        self.cleanRepositories()
+
     def test_generateFiles(self):
         self.phypster.init()
 
@@ -431,3 +463,5 @@ class PhypsterTest(TestCase):
             self.phypster.createEntity(data_entity)
 
         self.phypster.generateFiles()
+
+        self.cleanRepositories()
