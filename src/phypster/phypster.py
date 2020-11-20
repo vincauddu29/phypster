@@ -49,11 +49,11 @@ class Phypster:
     def createDirectory(self, name: str):
         if not os.path.exists(name):
             os.mkdir(name)
-            self.info("[x] {0} directory created".format(name))
+            self.debug("[x] {0} directory created".format(name))
             open("{0}{1}__init__.py".format(name, os.sep), "w").close()
-            self.info("[x] {0}{1}__init__.py created".format(name, os.sep))
+            self.debug("[x] {0}{1}__init__.py created".format(name, os.sep))
         else:
-            self.info("[x] {0} directory skip".format(name))
+            self.debug("[x] {0} directory skip".format(name))
 
     def getPathFileInStatic(self, path: str):
         BASE_DIR = None
