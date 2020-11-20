@@ -2,73 +2,104 @@
     "staticFiles": [
         {
             "pathInput": "helpersTest.py",
-            "pathOutput": "Tests/helpersTest.py",
-            "postCreateCmd": ""
+            "pathOutput": "{0}{1}Tests{0}helpersTest.py",
+            "postCreateCmd": "",
+            "src": false,
+            "test": true
         },{
             "pathInput": "security.py",
-            "pathOutput": "src/Config/SecurityConfig.py",
-            "postCreateCmd": ""
+            "pathOutput": "{0}{1}Config{1}SecurityConfig.py",
+            "postCreateCmd": "",
+            "src": true,
+            "test": false
         },{
             "pathInput": "logger.py",
-            "pathOutput": "src/Config/LoggerConfig.py",
-            "postCreateCmd": ""
+            "pathOutput": "{0}{1}Config{1}LoggerConfig.py",
+            "postCreateCmd": "",
+            "src": true,
+            "test": false
         },{
             "pathInput": "requirements.txt",
             "pathOutput": "requirements.txt",
-            "postCreateCmd": "pip3 install -r requirements.txt"
+            "postCreateCmd": "pip3 install -r requirements.txt",
+            "src": false,
+            "test": false
         },{
             "pathInput": "config.py",
-            "pathOutput": "src/Config/ApplicationConfig.py"
+            "pathOutput": "{0}{1}Config{1}ApplicationConfig.py",
+            "postCreateCmd": "",
+            "src": true,
+            "test": false
         },{
             "pathInput": "server.py",
-            "pathOutput": "server.py"
+            "pathOutput": "server.py",
+            "postCreateCmd": "",
+            "src": false,
+            "test": false
         },{
             "pathInput": "docker-compose.test.yml",
-            "pathOutput": "src/docker/docker-compose.test.yml"
+            "pathOutput": "{0}{1}docker{1}docker-compose.test.yml",
+            "postCreateCmd": "",
+            "src": true,
+            "test": false
         }
     ], "entityFiles" : [
         {
-            "pathInput": "template/entity.py.j2",
-            "pathOutput": "src/Models/{0}Entity.py"
+            "pathInput": "template{0}entity.py.j2",
+            "pathOutput": "{0}{1}Models{1}{2}Entity.py",
+            "src": true
         }, {
-            "pathInput": "template/repository.py.j2",
-            "pathOutput": "src/Repositories/{0}Repository.py"
+            "pathInput": "template{0}repository.py.j2",
+            "pathOutput": "{0}{1}Repositories{1}{2}Repository.py",
+            "src": true
         }, {
-            "pathInput": "template/dtoV1.py.j2",
-            "pathOutput": "src/DTOs/{0}DTO.py"
+            "pathInput": "template{0}dtoV1.py.j2",
+            "pathOutput": "{0}{1}DTOs{1}{2}DTO.py",
+            "src": true
         }, {
-            "pathInput": "template/mappeur.py.j2",
-            "pathOutput": "src/Mappeurs/{0}Mappeur.py"
+            "pathInput": "template{0}mappeur.py.j2",
+            "pathOutput": "{0}{1}Mappeurs{1}{2}Mappeur.py",
+            "src": true
         }, {
-            "pathInput": "template/service.py.j2",
-            "pathOutput": "src/Services/{0}Service.py"
+            "pathInput": "template{0}service.py.j2",
+            "pathOutput": "{0}{1}Services{1}{2}Service.py",
+            "src": true
         }, {
-            "pathInput": "template/parser.py.j2",
-            "pathOutput": "src/Parsers/{0}Parser.py"
+            "pathInput": "template{0}parser.py.j2",
+            "pathOutput": "{0}{1}Parsers{1}{2}Parser.py",
+            "src": true
         }, {
-            "pathInput": "template/ressource.py.j2",
-            "pathOutput": "src/Ressources/{0}Ressource.py"
+            "pathInput": "template{0}ressource.py.j2",
+            "pathOutput": "{0}{1}Ressources{1}{2}Ressource.py",
+            "src": true
         }, {
-            "pathInput": "template/entityTest.py.j2",
-            "pathOutput": "Tests/Models/test_{0}EntityTest.py"
+            "pathInput": "template{0}entityTest.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Models{1}test_{2}EntityTest.py",
+            "src": false
         }, {
-            "pathInput": "template/dtoV1Test.py.j2",
-            "pathOutput": "Tests/DTOs/test_{0}DTOTest.py"
+            "pathInput": "template{0}dtoV1Test.py.j2",
+            "pathOutput": "{0}{1}Tests{1}DTOs{1}test_{2}DTOTest.py",
+            "src": false
         }, {
-            "pathInput": "template/mappeurTest.py.j2",
-            "pathOutput": "Tests/Mappeurs/test_{0}MappeurTest.py"
+            "pathInput": "template{0}mappeurTest.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Mappeurs{1}test_{2}MappeurTest.py",
+            "src": false
         }, {
-            "pathInput": "template/ressourceTest.py.j2",
-            "pathOutput": "Tests/Ressources/test_{0}RessourceTest.py"
+            "pathInput": "template{0}ressourceTest.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Ressources{1}test_{2}RessourceTest.py",
+            "src": false
         }, {
-            "pathInput": "template/repositoryTest.py.j2",
-            "pathOutput": "Tests/Repositories/test_{0}RepositoryTest.py"
+            "pathInput": "template{0}repositoryTest.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Repositories{1}test_{2}RepositoryTest.py",
+            "src": false
         }, {
-            "pathInput": "template/serviceTest.py.j2",
-            "pathOutput": "Tests/Services/test_{0}ServiceTest.py"
+            "pathInput": "template{0}serviceTest.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Services{1}test_{2}ServiceTest.py",
+            "src": false
         }, {
-            "pathInput": "template/mock.py.j2",
-            "pathOutput": "Tests/Mocks/{0}Mock.py"
+            "pathInput": "template{0}mock.py.j2",
+            "pathOutput": "{0}{1}Tests{1}Mocks{1}{2}Mock.py",
+            "src": false
         }
     ]
 }

@@ -16,6 +16,8 @@ class Phypster:
         self.ASSOCIATETABLES: List[AssociateTable] = []
         self.ENTITIES: Dict[str, Entity] = dict()
         self.ENUMS: Dict[str, EnumEntity] = dict()
+        self.NAME_PROJECT = ""
+        self.BASE_PATH_SRC = ""
         with open("configFiles.json") as f:
             self.CONFIG_FILES = json.load(f)
 
@@ -69,11 +71,17 @@ class Phypster:
 
         return BASE_DIR + os.sep + "static" + os.sep + path
 
-    def init(self):
+    def init(self, config: dict):
         """ Init a new project """
 
+        self.NAME_PROJECT = config["name"]
+
         # create directories
-        self.createDirectory("src")
+        self.createDirectory(self.NAME_PROJECT)
+
+        self.BASE_PATH_SRC = "{0}{1}src".format(self.NAME_PROJECT, os.sep)
+
+        self.createDirectory(self.BASE_PATH_SRC)
         list_directories_name = {
             "Models": True,
             "DTOs": True,
@@ -89,25 +97,32 @@ class Phypster:
         }
 
         for directory_name in list_directories_name:
-            self.createDirectory("src/" + directory_name)
+            self.createDirectory("{0}{1}{2}".format(self.BASE_PATH_SRC, os.sep, directory_name))
 
-        self.createDirectory("src/Logs")
-        open("src/Logs/debug.log", "w").close()
-        open("src/Logs/info.log", "w").close()
-        open("src/Logs/error.log", "w").close()
+        self.createDirectory("{0}{1}Logs".format(self.BASE_PATH_SRC, os.sep))
+        open("{0}{1}Logs{1}debug.log".format(self.BASE_PATH_SRC, os.sep), "w").close()
+        open("{0}{1}Logs{1}info.log".format(self.BASE_PATH_SRC, os.sep), "w").close()
+        open("{0}{1}Logs{1}error.log".format(self.BASE_PATH_SRC, os.sep), "w").close()
 
         # test directories
-        self.createDirectory("Tests")
+        self.createDirectory("{0}{1}Tests".format(self.BASE_PATH_SRC, os.sep))
         for directory_name in list_directories_name.keys():
             if list_directories_name[directory_name]:
-                self.createDirectory("Tests/" + directory_name)
+                self.createDirectory("{0}{1}Tests{1}{2}".format(self.BASE_PATH_SRC, os.sep, directory_name))
 
         for pathsConfig in self.CONFIG_FILES["staticFiles"]:
             path = self.getPathFileInStatic(pathsConfig["pathInput"])
-            shutil.copy(path, pathsConfig["pathOutput"])
+            if pathsConfig["src"]:
+                pathOutput = pathsConfig["pathOutput"].format(self.BASE_PATH_SRC, os.sep)
+            elif pathsConfig["test"]:
+                path_test = "{0}{1}".format(self.NAME_PROJECT, os.sep)
+                pathOutput = pathsConfig["pathOutput"].format(path_test, os.sep)
+            else:
+                pathOutput = pathsConfig["pathOutput"]
+            shutil.copy(path, pathOutput)
             if pathsConfig["postCreateCmd"] != "":
                 os.system(pathsConfig["postCreateCmd"])
-            self.debug("[x] {0} file created".format(pathsConfig["pathOutput"]))
+            self.debug("[x] {0} file created".format(pathOutput))
         
 
         self.writeAppFile()
@@ -280,6 +295,7 @@ class Phypster:
         data = template.render(entity=entity)
 
         # Write file into the directory
+        
         with open(path_output, "w") as f:
             f.write(data)
 
@@ -292,20 +308,26 @@ class Phypster:
         # Write file into the directory
         # with open("src/app.py", "w") as f:
 
-        with open("src/__init__.py", "w") as f:
+        with open("{0}{1}__init__.py".format(self.BASE_PATH_SRC, os.sep), "w") as f:
             f.write(data)
             self.info("[x] create (or updated) __init__.py")
 
-    def generateFiles(self, entity: Entity, pathStaticFile: str, pathOutput: str):
-        self.writeFile(pathStaticFile, pathOutput.format(entity.nameEntity), entity)
+    def generateFiles(self, entity: Entity, pathConfig: dict):
+        pathStaticFile = pathConfig["pathInput"].format(os.sep)
+        if pathConfig["src"]:
+            pathOutput = pathConfig["pathOutput"].format(self.BASE_PATH_SRC, os.sep, entity.nameEntity)
+        else:
+            path_test = "{0}{1}Tests".format(self.NAME_PROJECT, os.sep)
+            pathOutput = pathConfig["pathOutput"].format(path_test, os.sep, entity.nameEntity)
+        self.writeFile(pathStaticFile, pathOutput, entity)
         self.debug("[x] {0} file created".format(pathOutput))
 
     def generateEnumsFiles(self, entity):
-        self.writeFile("template/enum.py.j2", "src/Enums/{0}Enum.py".format(entity.nameEnum), entity)
+        self.writeFile("template/enum.py.j2", "{0}{1}Enums{1}{2}Enum.py".format(self.BASE_PATH_SRC, os.sep, entity.nameEnum), entity)
         self.debug("[x] {0}Enum file created".format(entity.nameEnum))
 
     def generateAssociatedTableFiles(self, associatedTable):
-        self.writeFile("template/associatedTable.py.j2", "src/Models/{0}.py".format(associatedTable.name), associatedTable)
+        self.writeFile("template/associatedTable.py.j2", "{0}{1}Models{1}{2}.py".format(self.BASE_PATH_SRC, os.sep, associatedTable.name), associatedTable)
         self.info("[x] {0} file created".format(associatedTable.name))
 
     def generateFiles(self):

@@ -1,4 +1,7 @@
 {
+    "config": {
+        "name": "projetTest"
+    },
     "enums": [
         {
             "name": "Genre",
